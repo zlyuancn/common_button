@@ -9,7 +9,7 @@ create table common_button
     `extend`         varchar(8192)    default '{}'              not null comment '扩展数据, json',
     -- 以下字段无业务逻辑, 或者是透传到客户端字段
     `button_title`   varchar(64)      default ''                not null comment '按钮标题',
-    `button_desc`    varchar(128)     default ''                not null comment '按钮描述',
+    `button_desc`    varchar(128)     default ''                not null comment '按钮描述/副标题',
     `icon1`          varchar(128)     default ''                not null comment '图片1',
     `icon2`          varchar(128)     default ''                not null comment '图片2',
     `icon3`          varchar(128)     default ''                not null comment '图片3',
