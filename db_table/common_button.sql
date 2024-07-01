@@ -1,10 +1,10 @@
 create table common_button
 (
     `id`             int unsigned auto_increment                not null primary key,
-    `appid`          int unsigned     default 0                 not null comment '用于区分业务',
-    `scene_id`       int unsigned     default 0                 not null comment '业务下的场景id',
+    `module_id`      int unsigned     default 0                 not null comment '用于区分业务模块',
+    `scene_id`       int unsigned     default 0                 not null comment '业务下的场景/页面id',
     `common_task_id` int unsigned     default 0                 not null comment '通用任务id',
-    `enabled`        tinyint unsigned default 0                 not null comment '状态：0：未发布, 1: 已发布',
+    `enabled`        tinyint unsigned default 0                 not null comment '状态：0=未发布, 1=已发布',
     `button_title`   varchar(64)      default ''                not null comment '按钮标题',
     `button_desc`    varchar(128)     default ''                not null comment '按钮描述',
     `icon1`          varchar(128)     default ''                not null comment '图片1',
@@ -19,4 +19,4 @@ create table common_button
     `utime`          datetime         default current_timestamp not null comment '更新时间' on update current_timestamp
 ) comment '通用按钮';
 
-create index button_app_scene_index on common_button (`appid`, `scene_id`, `sort_value`);
+create index button_module_scene_index on common_button (`module_id`, `scene_id`, `sort_value`);
