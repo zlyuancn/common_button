@@ -1,0 +1,468 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "决定proto引用路径和rpc路由",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "CommonButtonService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/CommonButton/ClickButton": {
+      "post": {
+        "summary": "ClickButton 点击按钮",
+        "operationId": "CommonButtonService_ClickButton",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/common_buttonClickButtonRsp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/common_buttonClickButtonReq"
+            }
+          }
+        ],
+        "tags": [
+          "CommonButtonService"
+        ]
+      }
+    },
+    "/CommonButton/GetButtonList": {
+      "post": {
+        "summary": "获取按钮列表",
+        "operationId": "CommonButtonService_GetButtonList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/common_buttonGetButtonListRsp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/common_buttonGetButtonListReq"
+            }
+          }
+        ],
+        "tags": [
+          "CommonButtonService"
+        ]
+      }
+    },
+    "/CommonButton/OneClickFinish": {
+      "post": {
+        "summary": "一键领取所有奖品",
+        "operationId": "CommonButtonService_OneClickFinish",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/common_buttonOneClickFinishRsp"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/common_buttonOneClickFinishReq"
+            }
+          }
+        ],
+        "tags": [
+          "CommonButtonService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "common_buttonButton": {
+      "type": "object",
+      "properties": {
+        "moduleId": {
+          "$ref": "#/definitions/common_buttonButtonModuleID",
+          "title": "模块id"
+        },
+        "sceneId": {
+          "$ref": "#/definitions/common_buttonButtonSceneID",
+          "title": "场景id"
+        },
+        "buttonId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "按钮id"
+        },
+        "buttonTitle": {
+          "type": "string",
+          "title": "按钮标题"
+        },
+        "buttonDesc": {
+          "type": "string",
+          "title": "按钮描述"
+        },
+        "icon1": {
+          "type": "string",
+          "title": "图片1"
+        },
+        "Icon2": {
+          "type": "string",
+          "title": "图片2"
+        },
+        "Icon3": {
+          "type": "string",
+          "title": "图片3"
+        },
+        "sortValue": {
+          "type": "integer",
+          "format": "int32",
+          "title": "正序，排序值相同时以创建时间正序"
+        },
+        "skipValue": {
+          "type": "string",
+          "title": "跳转地址"
+        },
+        "skipTitle": {
+          "type": "string",
+          "title": "跳转按钮标题"
+        },
+        "buttonExtend": {
+          "type": "string",
+          "title": "按钮扩展数据"
+        },
+        "task": {
+          "$ref": "#/definitions/common_buttonTask",
+          "title": "任务"
+        },
+        "taskState": {
+          "$ref": "#/definitions/common_buttonTaskState",
+          "title": "任务状态"
+        }
+      },
+      "title": "按钮"
+    },
+    "common_buttonButtonModuleID": {
+      "type": "string",
+      "enum": [
+        "BUTTON_MODULE_ID_UNKNOWN"
+      ],
+      "default": "BUTTON_MODULE_ID_UNKNOWN"
+    },
+    "common_buttonButtonSceneID": {
+      "type": "string",
+      "enum": [
+        "BUTTON_SCENE_ID_UNKNOWN"
+      ],
+      "default": "BUTTON_SCENE_ID_UNKNOWN"
+    },
+    "common_buttonClickButtonReq": {
+      "type": "object",
+      "properties": {
+        "buttonId": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "common_buttonClickButtonRsp": {
+      "type": "object",
+      "properties": {
+        "taskState": {
+          "$ref": "#/definitions/common_buttonClickTaskState",
+          "title": "任务状态"
+        }
+      }
+    },
+    "common_buttonClickTaskState": {
+      "type": "object",
+      "properties": {
+        "buttonId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "按钮id"
+        },
+        "taskId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "任务id"
+        },
+        "finishStatus": {
+          "$ref": "#/definitions/common_buttonTaskFinishStatus",
+          "title": "任务完成状态"
+        },
+        "prizes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/common_buttonPrize"
+          },
+          "title": "奖品列表"
+        },
+        "skipTitle": {
+          "type": "string",
+          "title": "新的跳转按钮标题"
+        }
+      },
+      "title": "点击后返回的任务状态"
+    },
+    "common_buttonGetButtonListReq": {
+      "type": "object",
+      "properties": {
+        "moduleId": {
+          "$ref": "#/definitions/common_buttonButtonModuleID",
+          "title": "区分业务id"
+        },
+        "sceneId": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/common_buttonButtonSceneID"
+          },
+          "title": "区分场景id, 空列表表示拉取全部场景"
+        }
+      }
+    },
+    "common_buttonGetButtonListRsp": {
+      "type": "object",
+      "properties": {
+        "buttons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/common_buttonButton"
+          },
+          "title": "按钮列表"
+        }
+      }
+    },
+    "common_buttonOneClickFinishReq": {
+      "type": "object",
+      "properties": {
+        "moduleId": {
+          "$ref": "#/definitions/common_buttonButtonModuleID",
+          "title": "区分业务id"
+        },
+        "sceneId": {
+          "$ref": "#/definitions/common_buttonButtonSceneID",
+          "title": "区分场景id, 空列表表示拉取全部场景"
+        }
+      }
+    },
+    "common_buttonOneClickFinishRsp": {
+      "type": "object",
+      "properties": {
+        "taskState": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/common_buttonClickTaskState"
+          },
+          "title": "任务状态"
+        }
+      }
+    },
+    "common_buttonPrize": {
+      "type": "object",
+      "properties": {
+        "prizeId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "奖品id"
+        },
+        "prizeName": {
+          "type": "string",
+          "title": "奖品名称"
+        },
+        "prizeUrl": {
+          "type": "string",
+          "title": "奖品图片url"
+        }
+      },
+      "title": "奖品"
+    },
+    "common_buttonTask": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "integer",
+          "format": "int32",
+          "title": "任务id"
+        },
+        "startTime": {
+          "type": "integer",
+          "format": "int32",
+          "title": "任务开始时间, 秒级时间戳"
+        },
+        "endTime": {
+          "type": "integer",
+          "format": "int32",
+          "title": "任务结束时间, 秒级时间戳"
+        },
+        "taskTarget": {
+          "type": "integer",
+          "format": "int32",
+          "title": "任务目标"
+        },
+        "prizes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/common_buttonPrize"
+          },
+          "title": "奖品列表"
+        },
+        "taskHideRule": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/common_buttonTaskHideRule"
+          },
+          "title": "隐藏规则列表"
+        },
+        "taskExtend": {
+          "type": "string",
+          "title": "任务扩展数据"
+        },
+        "taskPeriodType": {
+          "$ref": "#/definitions/common_buttonTaskPeriodType",
+          "title": "任务周期"
+        },
+        "taskType": {
+          "$ref": "#/definitions/common_buttonTaskType",
+          "title": "任务类型"
+        },
+        "taskTemplateExtend": {
+          "type": "string",
+          "title": "任务模板扩展数据"
+        }
+      },
+      "title": "任务"
+    },
+    "common_buttonTaskFinishStatus": {
+      "type": "string",
+      "enum": [
+        "TASK_FINISH_STATUS_UNFINISHED",
+        "TASK_FINISH_STATUS_FINISHED",
+        "TASK_FINISH_STATUS_RECEIVED",
+        "TASK_FINISH_STATUS_HIDED"
+      ],
+      "default": "TASK_FINISH_STATUS_UNFINISHED",
+      "description": "- TASK_FINISH_STATUS_UNFINISHED: 未完成\n - TASK_FINISH_STATUS_FINISHED: 已完成\n - TASK_FINISH_STATUS_RECEIVED: 已领取\n - TASK_FINISH_STATUS_HIDED: 已隐藏",
+      "title": "任务完成状态"
+    },
+    "common_buttonTaskHideRule": {
+      "type": "string",
+      "enum": [
+        "TASK_HIDE_RULE_NONE",
+        "TASK_HIDE_RULE_FINISHED",
+        "TASK_HIDE_RULE_RECEIVED"
+      ],
+      "default": "TASK_HIDE_RULE_NONE",
+      "description": "- TASK_HIDE_RULE_FINISHED: 完成后隐藏\n - TASK_HIDE_RULE_RECEIVED: 领奖后隐藏",
+      "title": "任务隐藏规则"
+    },
+    "common_buttonTaskPeriodType": {
+      "type": "string",
+      "enum": [
+        "TASK_PERIOD_TYPE_NONE",
+        "TASK_PERIOD_TYPE_DAY",
+        "TASK_PERIOD_TYPE_WEEK"
+      ],
+      "default": "TASK_PERIOD_TYPE_NONE",
+      "description": "- TASK_PERIOD_TYPE_NONE: 无周期\n - TASK_PERIOD_TYPE_DAY: 自然日\n - TASK_PERIOD_TYPE_WEEK: 自然周",
+      "title": "任务周期类型"
+    },
+    "common_buttonTaskState": {
+      "type": "object",
+      "properties": {
+        "taskProgress": {
+          "type": "integer",
+          "format": "int32",
+          "title": "任务进度"
+        },
+        "finishStatus": {
+          "$ref": "#/definitions/common_buttonTaskFinishStatus",
+          "title": "任务完成状态"
+        }
+      },
+      "title": "任务状态"
+    },
+    "common_buttonTaskType": {
+      "type": "string",
+      "enum": [
+        "TASK_TYPE_UNKNOWN",
+        "TASK_TYPE_JUMP",
+        "TASK_TYPE_CHECKIN"
+      ],
+      "default": "TASK_TYPE_UNKNOWN",
+      "description": "- TASK_TYPE_JUMP: 跳转任务\n - TASK_TYPE_CHECKIN: 签到",
+      "title": "任务类型"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

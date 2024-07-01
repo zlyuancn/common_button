@@ -1,11 +1,11 @@
 create table common_button
 (
-    `id`             int unsigned auto_increment                not null primary key,
+    `id`             int unsigned auto_increment                not null primary key comment '按钮id',
     `module_id`      int unsigned     default 0                 not null comment '用于区分业务模块',
     `scene_id`       int unsigned     default 0                 not null comment '业务下的场景/页面id',
     `common_task_id` int unsigned     default 0                 not null comment '通用任务id',
     `enabled`        tinyint unsigned default 0                 not null comment '状态：0=未发布, 1=已发布',
-    `sort_value`     int              default 0                 not null comment '正序, 排序值相同时以创建时间正序',
+    `sort_value`     int              default 999               not null comment '排序值. 正序, 排序值相同时以创建时间正序',
     `extend`         varchar(8192)    default '{}'              not null comment '扩展数据, json',
     -- 以下字段无业务逻辑, 或者是透传到客户端字段
     `button_title`   varchar(64)      default ''                not null comment '按钮标题',

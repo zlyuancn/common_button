@@ -1,0 +1,145 @@
+syntax = 'proto3';
+package common_button; // 决定proto引用路径和rpc路由
+option go_package = "github.com/zlyuancn/common_button/pb"; // 用于对golang包管理的定位
+
+import "google/api/annotations.proto";  // 添加导入
+import "validate/validate.proto";
+
+// 通用按钮服务
+service CommonButtonService{
+  // 获取按钮列表
+  rpc GetButtonList(GetButtonListReq) returns (GetButtonListRsp) {
+    option (google.api.http) = {
+      post: "/CommonButton/GetButtonList",
+      body: "*",
+    };
+  }
+  // ClickButton 点击按钮
+  rpc ClickButton(ClickButtonReq) returns (ClickButtonRsp) {
+    option (google.api.http) = {
+      post: "/CommonButton/ClickButton",
+      body: "*",
+    };
+  }
+  // 一键领取所有奖品
+  rpc OneClickFinish(OneClickFinishReq) returns (OneClickFinishRsp) {
+    option (google.api.http) = {
+      post: "/CommonButton/OneClickFinish",
+      body: "*",
+    };
+  }
+}
+
+message GetButtonListReq {
+  ButtonModuleID module_id = 1; // 区分业务id
+  repeated ButtonSceneID scene_id = 2; // 区分场景id, 空列表表示拉取全部场景
+}
+
+message GetButtonListRsp {
+  repeated Button buttons = 1; // 按钮列表
+}
+
+message ClickButtonReq {
+  int32 button_id = 1;
+}
+message ClickButtonRsp {
+  ClickTaskState task_state = 1; // 任务状态
+}
+
+message OneClickFinishReq {
+  ButtonModuleID module_id = 1; // 区分业务id
+  ButtonSceneID scene_id = 2; // 区分场景id, 空列表表示拉取全部场景
+}
+message OneClickFinishRsp {
+  repeated ClickTaskState task_state = 1; // 任务状态
+}
+
+// 按钮
+message Button {
+  ButtonModuleID module_id = 1; // 模块id
+  ButtonSceneID scene_id = 2; // 场景id
+
+  int32 button_id = 3; // 按钮id
+  string button_title = 4; // 按钮标题
+  string button_desc = 5; // 按钮描述
+  string icon1 = 6; // 图片1
+  string Icon2 = 7; // 图片2
+  string Icon3 = 8; // 图片3
+  int32 sort_value = 9; // 正序，排序值相同时以创建时间正序
+  string skip_value = 10; // 跳转地址
+  string skip_title = 11; // 跳转按钮标题
+  string button_extend = 12; // 按钮扩展数据
+  Task task = 13; // 任务
+  TaskState task_state = 14; // 任务状态
+}
+// 任务
+message Task {
+  int32 task_id = 1; // 任务id
+  int32 start_time = 2; // 任务开始时间, 秒级时间戳
+  int32 end_time = 3; // 任务结束时间, 秒级时间戳
+  int32 task_target = 4; // 任务目标
+  repeated Prize prizes = 5; // 奖品列表
+  repeated TaskHideRule task_hide_rule = 6; // 隐藏规则列表
+  string task_extend = 7; // 任务扩展数据
+
+  TaskPeriodType task_period_type = 8; // 任务周期
+  TaskType task_type = 9; // 任务类型
+  string task_template_extend = 10; // 任务模板扩展数据
+}
+// 任务状态
+message TaskState {
+  int32 task_progress = 1; // 任务进度
+  TaskFinishStatus finish_status = 2; // 任务完成状态
+}
+
+// 点击后返回的任务状态
+message ClickTaskState {
+  int32 button_id = 1; // 按钮id
+  int32 task_id = 2; // 任务id
+  TaskFinishStatus finish_status = 3; // 任务完成状态
+  repeated Prize prizes = 4; // 奖品列表
+  string skip_title = 5; // 新的跳转按钮标题
+}
+
+// 奖品
+message Prize {
+  int32 prize_id = 1; // 奖品id
+  string prize_name = 2; // 奖品名称
+  string prize_url = 3; // 奖品图片url
+}
+
+enum ButtonModuleID {
+  BUTTON_MODULE_ID_UNKNOWN = 0;
+}
+enum ButtonSceneID {
+  BUTTON_SCENE_ID_UNKNOWN = 0;
+}
+
+// 任务周期类型
+enum TaskPeriodType {
+  TASK_PERIOD_TYPE_NONE = 0; // 无周期
+  TASK_PERIOD_TYPE_DAY = 1; // 自然日
+  TASK_PERIOD_TYPE_WEEK = 2; // 自然周
+}
+
+// 任务隐藏规则
+enum TaskHideRule {
+  TASK_HIDE_RULE_NONE = 0;
+  TASK_HIDE_RULE_FINISHED = 1; // 完成后隐藏
+  TASK_HIDE_RULE_RECEIVED = 2; // 领奖后隐藏
+}
+
+// 任务类型
+enum TaskType {
+  TASK_TYPE_UNKNOWN = 0;
+  TASK_TYPE_JUMP = 1; // 跳转任务
+  TASK_TYPE_CHECKIN = 2; // 签到
+}
+
+// 任务完成状态
+enum TaskFinishStatus {
+  TASK_FINISH_STATUS_UNFINISHED = 0; // 未完成
+  TASK_FINISH_STATUS_FINISHED = 1; // 已完成
+  TASK_FINISH_STATUS_RECEIVED = 2; // 已领取
+  TASK_FINISH_STATUS_HIDED = 3; // 已隐藏
+}
