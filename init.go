@@ -1,6 +1,9 @@
 package common_button
 
 import (
+	"context"
+
+	"github.com/zly-app/grpc"
 	"github.com/zly-app/zapp"
 	"github.com/zly-app/zapp/config"
 	"github.com/zly-app/zapp/core"
@@ -9,7 +12,9 @@ import (
 
 	"github.com/zlyuancn/common_button/client"
 	"github.com/zlyuancn/common_button/conf"
-	"github.com/zlyuancn/common_button/loopload"
+	"github.com/zlyuancn/common_button/dao"
+	"github.com/zlyuancn/common_button/pb"
+	"github.com/zlyuancn/common_button/view"
 )
 
 func init() {
@@ -24,7 +29,14 @@ func init() {
 	})
 	zapp.AddHandler(zapp.AfterInitializeHandler, func(app core.IApp, handlerType handler.HandlerType) {
 		client.Init(app)
-		loopload.Start()
+		dao.StartLoopLoad()
+	})
+	zapp.AddHandler(zapp.BeforeStartHandler, func(app core.IApp, handlerType handler.HandlerType) {
+		grpc.RegistryServerHandler(func(ctx context.Context, server grpc.ServiceRegistrar) {
+			pb.RegisterCommonButtonServiceServer(server, view.NewButtonService())
+		})
+		grpcClient := pb.NewCommonButtonServiceClient(grpc.GetGatewayClientConn(conf.Conf.ButtonGrpcGatewayClientName))
+		_ = pb.RegisterCommonButtonServiceHandlerClient(context.Background(), grpc.GetGatewayMux(), grpcClient)
 	})
 	zapp.AddHandler(zapp.AfterExitHandler, func(app core.IApp, handlerType handler.HandlerType) {
 		client.Close()

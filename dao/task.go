@@ -25,7 +25,7 @@ type TaskModel struct {
 var taskSelectField = getModelSelectField(TaskModel{})
 
 // 获取所有任务
-func GetAllTask(ctx context.Context) ([]*TaskModel, error) {
+func loadAllTask(ctx context.Context) ([]*TaskModel, error) {
 	var cond = `select ` + taskSelectField + ` from common_task`
 
 	var ret []*TaskModel
@@ -45,7 +45,7 @@ type TaskTemplateModel struct {
 var taskTemplateSelectField = getModelSelectField(TaskTemplateModel{})
 
 // 获取所有任务模板
-func GetAllTaskTemplate(ctx context.Context) ([]*TaskTemplateModel, error) {
+func loadAllTaskTemplate(ctx context.Context) ([]*TaskTemplateModel, error) {
 	var cond = `select ` + taskTemplateSelectField + ` from common_task_template`
 
 	var ret []*TaskTemplateModel

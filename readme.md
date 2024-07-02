@@ -1,54 +1,22 @@
 
 <!-- TOC -->
 
-- [common\_button 是什么](#common_button-是什么)
-- [术语](#术语)
-  - [module 模块](#module-模块)
-  - [scene 场景/页面](#scene-场景页面)
-  - [button 按钮](#button-按钮)
-  - [task\_template 任务模板](#task_template-任务模板)
-  - [task 任务](#task-任务)
-- [高性能秘诀](#高性能秘诀)
-- [个性化改造](#个性化改造)
-- [如何使用](#如何使用)
-  - [前置准备](#前置准备)
-  - [接入通用按钮](#接入通用按钮)
-  - [接入通用任务](#接入通用任务)
-  - [新增任务类型](#新增任务类型)
+- [高性能秘诀](#%E9%AB%98%E6%80%A7%E8%83%BD%E7%A7%98%E8%AF%80)
+- [前置准备](#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87)
+    - [底层组件要求](#%E5%BA%95%E5%B1%82%E7%BB%84%E4%BB%B6%E8%A6%81%E6%B1%82)
+    - [sql文件导入](#sql%E6%96%87%E4%BB%B6%E5%AF%BC%E5%85%A5)
+    - [修改配置文件](#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6)
+- [示例](#%E7%A4%BA%E4%BE%8B)
+- [接入](#%E6%8E%A5%E5%85%A5)
+    - [接入通用按钮](#%E6%8E%A5%E5%85%A5%E9%80%9A%E7%94%A8%E6%8C%89%E9%92%AE)
+    - [接入通用任务](#%E6%8E%A5%E5%85%A5%E9%80%9A%E7%94%A8%E4%BB%BB%E5%8A%A1)
+    - [新增任务类型](#%E6%96%B0%E5%A2%9E%E4%BB%BB%E5%8A%A1%E7%B1%BB%E5%9E%8B)
+    - [个性化改造](#%E4%B8%AA%E6%80%A7%E5%8C%96%E6%94%B9%E9%80%A0)
+- [示例配置](#%E7%A4%BA%E4%BE%8B%E9%85%8D%E7%BD%AE)
+    - [一次性纯跳转按钮, 点击跳转后消失, 第二周重新出现](#%E4%B8%80%E6%AC%A1%E6%80%A7%E7%BA%AF%E8%B7%B3%E8%BD%AC%E6%8C%89%E9%92%AE-%E7%82%B9%E5%87%BB%E8%B7%B3%E8%BD%AC%E5%90%8E%E6%B6%88%E5%A4%B1-%E7%AC%AC%E4%BA%8C%E5%91%A8%E9%87%8D%E6%96%B0%E5%87%BA%E7%8E%B0)
+    - [每日签到任务, 签到后消失, 第二天重新出现](#%E6%AF%8F%E6%97%A5%E7%AD%BE%E5%88%B0%E4%BB%BB%E5%8A%A1-%E7%AD%BE%E5%88%B0%E5%90%8E%E6%B6%88%E5%A4%B1-%E7%AC%AC%E4%BA%8C%E5%A4%A9%E9%87%8D%E6%96%B0%E5%87%BA%E7%8E%B0)
 
 <!-- /TOC -->
-
----
-
-# common_button 是什么
-
-common_button 是一个通用按钮库, 用于快速方便的创建app上使用的一些按钮. 运营可以在不对app发版的情况下增加/删除/修改按钮.
-
-for 客户端: 统一接口, 一次对接, 多场景适配.
-for 后台: 一次开发, 东哥配置好实现多场景复用.
-for 运营: 统一管理, 功能广泛, 使用门槛低.
-
-![](./assets/button1.png)![](./assets/button2.png)![](./assets/button3.png)
-
----
-
-# 术语
-
-## module 模块
-
-module 表示一个业务下的一个模块划分, 比如`商城/论坛/用户中心`表示不同的模块
-
-## scene 场景/页面
-
-scene 表示不同的场景/页面, 比如用户中心的`个人信息/用户协议`表示不同的页面. 也可以用来区分同一个页面中的不同位置.
-
-## button 按钮
-
-button 表示一个场景/页面上可以点击的按钮, 这些简单的按钮不能有复杂的业务逻辑
-
-## task_template 任务模板
-
-task_template 用于定义一个任务类型, 比如 跳转/签到/第三方任务, 它是开发者决定的.
 
 ## task 任务
 
@@ -83,21 +51,92 @@ end
 
 opt 拉取数据
 A ->> B: req
+B -->> B: 从内存加载数据
 B ->> A: rsp
 end
 ```
 
 ---
 
-# 个性化改造
+# 前置准备
 
-部分业务可能需要对数据做特殊处理, 或者想把按钮数据和其业务数据在一个接口中返回, 开发者可以通过rpc拉取数据并嵌入到自己的业务接口中.
+## 底层组件要求
+
+- redis 储存用户任务状态, 也可以使用 kvrocks (兼容redis的硬盘储存nosql)
+- mysql 储存按钮和任务信息, 可以使用 mysql/mariadb/pgsql 等
+
+## sql文件导入
+
+1. 首先准备一个库名为 `common_button` 的mysql库. 这个库名可以根据sqlx组件配置的连接db库修改
+2. 创建导入相关表, 表文件在[这里](./db_table/common_button.sql)
+
+## 修改配置文件
+
+配置内容参考:
+
+```yaml
+# common_button 配置
+common_button:
+   ButtonSqlxName: 'common_button' # 按钮的sqlx组件名
+   ReloadButtonIntervalSec: 60 # 重新加载按钮数据的间隔时间, 单位秒
+   ButtonTaskDataRedisName: 'common_button' # 按钮任务数据的redis组件名
+   ButtonGrpcGatewayClientName: 'common_button' # grpc网关客户端组件名
+
+# 依赖组件
+components:
+   sqlx: # 参考 https://github.com/zly-app/component/tree/master/sqlx
+      common_button:
+         Driver: mysql # 驱动, 支持 mysql, postgres, sqlite3, mssql
+         Source: 'user:passwd@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local' # 连接源
+         # ...
+   redis: # 参考 https://github.com/zly-app/component/tree/master/redis
+      common_button:
+         Address: localhost:6379
+         # ...
+   grpc: # 参考 https://github.com/zly-app/grpc/tree/master/client
+      common_button:
+         Address: localhost:3000
+         # ...
+
+services:
+   grpc: # 参考 https://github.com/zly-app/grpc
+      Bind: :3000 # bind地址
+      # ...
+   grpc-gateway: # 网关配置
+      Bind: :8080 # bind地址
+      # ...
+```
 
 ---
 
-# 如何使用
+# 示例
 
-## 前置准备
+```go
+package main
+
+import (
+	"github.com/zly-app/grpc"
+	"github.com/zly-app/uapp"
+
+	_ "github.com/zlyuancn/common_button"
+)
+
+func main() {
+	app := uapp.NewApp("zapp.test.common_button",
+		grpc.WithService(),
+		grpc.WithGatewayService(),
+	)
+	defer app.Exit()
+
+	app.Run()
+}
+```
+
+运行后会启动一个grpc服务及一个api网关服务. 其pb定义在[这里](./pb/button.proto). 对客户端的api可以提供[swagger文件](./pb/button.swagger.json)
+
+---
+
+# 接入
 
 ## 接入通用按钮
 
@@ -137,9 +176,15 @@ end
 
 代码示例...
 
+## 个性化改造
+
+部分业务可能需要对数据做特殊处理, 或者想把按钮数据和其业务数据在一个接口中返回, 开发者可以通过rpc拉取数据并嵌入到自己的业务接口中.
+
 ---
 
 # 示例配置
+
+这里假定使用者已经创建好了其业务模块(module)和场景\/页面(scene)
 
 ## 一次性纯跳转按钮, 点击跳转后消失, 第二周重新出现
 

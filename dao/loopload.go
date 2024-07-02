@@ -1,4 +1,4 @@
-package loopload
+package dao
 
 import (
 	"context"
@@ -12,10 +12,10 @@ import (
 	"github.com/spf13/cast"
 	"github.com/zly-app/utils/loopload"
 	"github.com/zly-app/zapp/logger"
+	"github.com/zly-app/zapp/pkg/utils"
 	"go.uber.org/zap"
 
 	"github.com/zlyuancn/common_button/conf"
-	"github.com/zlyuancn/common_button/dao"
 	"github.com/zlyuancn/common_button/pb"
 )
 
@@ -27,28 +27,30 @@ type buttonTaskMap struct {
 	PrizeMapping             map[int32]*pb.Prize                                     // 奖品映射
 }
 
-func Start() {
+func StartLoopLoad() {
 	t := time.Duration(conf.Conf.ReloadButtonIntervalSec) * time.Second
 	ButtonTaskMap = loopload.New("common_button", loadAllButtonTask, loopload.WithReloadTime(t))
 }
 
 func loadAllButtonTask(ctx context.Context) (*buttonTaskMap, error) {
+	ctx = utils.Ctx.CloneContext(ctx) // 去掉ctx超时
+
 	// 加载module
-	moduleList, err := dao.GetAllModule(ctx)
+	moduleList, err := loadAllModule(ctx)
 	if err != nil {
-		logger.Error(ctx, "common_button call loadAllButtonTask call GetAllModule err: %v", err)
+		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllModule err", zap.Error(err))
 		return nil, err
 	}
 	// 加载scene
-	sceneList, err := dao.GetAllScene(ctx)
+	sceneList, err := loadAllScene(ctx)
 	if err != nil {
-		logger.Error(ctx, "common_button call loadAllButtonTask call GetAllScene err: %v", err)
+		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllScene err", zap.Error(err))
 		return nil, err
 	}
 	// 加载按钮
-	buttonList, err := dao.GetAllButton(ctx)
+	buttonList, err := loadAllButton(ctx)
 	if err != nil {
-		logger.Error(ctx, "common_button call loadAllButtonTask call GetAllButton err: %v", err)
+		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllButton err", zap.Error(err))
 		return nil, err
 	}
 	sort.Slice(buttonList, func(i, j int) bool {
@@ -59,23 +61,23 @@ func loadAllButtonTask(ctx context.Context) (*buttonTaskMap, error) {
 	})
 
 	// 加载任务模板
-	taskTemplateList, err := dao.GetAllTaskTemplate(ctx)
+	taskTemplateList, err := loadAllTaskTemplate(ctx)
 	if err != nil {
-		logger.Error(ctx, "common_button call loadAllButtonTask call GetAllTaskTemplate err: %v", err)
+		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllTaskTemplate err", zap.Error(err))
 		return nil, err
 	}
-	taskTemplateMM := lo.SliceToMap(taskTemplateList, func(t *dao.TaskTemplateModel) (int32, *dao.TaskTemplateModel) {
+	taskTemplateMM := lo.SliceToMap(taskTemplateList, func(t *TaskTemplateModel) (int32, *TaskTemplateModel) {
 		return int32(t.ID), t
 	})
 	// 加载任务
-	taskList, err := dao.GetAllTask(ctx)
+	taskList, err := loadAllTask(ctx)
 	if err != nil {
-		logger.Error(ctx, "common_button call loadAllButtonTask call GetAllTask err: %v", err)
+		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllTask err", zap.Error(err))
 		return nil, err
 	}
 	taskMM, err := genTasksPB(ctx, taskList, taskTemplateMM)
 	if err != nil {
-		logger.Error(ctx, "common_button call loadAllButtonTask call genTasksPB err: %v", err)
+		logger.Error(ctx, "common_button call loadAllButtonTask call genTasksPB err", zap.Error(err))
 		return nil, err
 	}
 
@@ -121,7 +123,7 @@ func loadAllButtonTask(ctx context.Context) (*buttonTaskMap, error) {
 	return ret, nil
 }
 
-func genButtonPB(ctx context.Context, b *dao.ButtonModel, taskMM map[int32]*pb.Task) (*pb.Button, error) {
+func genButtonPB(ctx context.Context, b *ButtonModel, taskMM map[int32]*pb.Task) (*pb.Button, error) {
 	ret := &pb.Button{
 		ModuleId:     pb.ButtonModuleID(b.ModuleID),
 		SceneId:      pb.ButtonSceneID(b.SceneID),
@@ -150,7 +152,7 @@ func genButtonPB(ctx context.Context, b *dao.ButtonModel, taskMM map[int32]*pb.T
 	return ret, nil
 }
 
-func genTasksPB(ctx context.Context, taskList []*dao.TaskModel, taskTemplateMM map[int32]*dao.TaskTemplateModel) (map[int32]*pb.Task, error) {
+func genTasksPB(ctx context.Context, taskList []*TaskModel, taskTemplateMM map[int32]*TaskTemplateModel) (map[int32]*pb.Task, error) {
 	ret := make(map[int32]*pb.Task, len(taskList))
 	for _, t := range taskList {
 		tt, ok := taskTemplateMM[int32(t.TemplateID)]
@@ -217,7 +219,7 @@ func genTasksPB(ctx context.Context, taskList []*dao.TaskModel, taskTemplateMM m
 	return ret, nil
 }
 
-func genPrizePB(ctx context.Context, t *dao.TaskModel, prizeIDs []int32) ([]*pb.Prize, error) {
+func genPrizePB(ctx context.Context, t *TaskModel, prizeIDs []int32) ([]*pb.Prize, error) {
 	if len(prizeIDs) == 0 {
 		return nil, nil
 	}

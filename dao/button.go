@@ -15,7 +15,7 @@ type ButtonModuleModel struct {
 }
 
 // 获取所有业务模块
-func GetAllModule(ctx context.Context) ([]*ButtonModuleModel, error) {
+func loadAllModule(ctx context.Context) ([]*ButtonModuleModel, error) {
 	const cond = `select module_id,module_name from common_button_module`
 
 	var ret []*ButtonModuleModel
@@ -29,7 +29,7 @@ type ButtonSceneModel struct {
 	SceneName string `db:"scene_name"` // 场景名
 }
 
-func GetAllScene(ctx context.Context) ([]*ButtonSceneModel, error) {
+func loadAllScene(ctx context.Context) ([]*ButtonSceneModel, error) {
 	const cond = `select module_id,scene_id,scene_name from common_button_scene`
 
 	var ret []*ButtonSceneModel
@@ -59,7 +59,7 @@ type ButtonModel struct {
 var buttonSelectField = getModelSelectField(ButtonModel{})
 
 // 获取所有按钮
-func GetAllButton(ctx context.Context) ([]*ButtonModel, error) {
+func loadAllButton(ctx context.Context) ([]*ButtonModel, error) {
 	var cond = `select ` + buttonSelectField + ` from common_button where enabled=1`
 
 	var ret []*ButtonModel
