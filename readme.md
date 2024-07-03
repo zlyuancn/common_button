@@ -1,6 +1,13 @@
 
 <!-- TOC -->
 
+- [common_button 是什么](#common_button-%E6%98%AF%E4%BB%80%E4%B9%88)
+- [术语](#%E6%9C%AF%E8%AF%AD)
+    - [module 模块](#module-%E6%A8%A1%E5%9D%97)
+    - [scene 场景/页面](#scene-%E5%9C%BA%E6%99%AF%E9%A1%B5%E9%9D%A2)
+    - [button 按钮](#button-%E6%8C%89%E9%92%AE)
+    - [task_template 任务模板](#task_template-%E4%BB%BB%E5%8A%A1%E6%A8%A1%E6%9D%BF)
+    - [task 任务](#task-%E4%BB%BB%E5%8A%A1)
 - [高性能秘诀](#%E9%AB%98%E6%80%A7%E8%83%BD%E7%A7%98%E8%AF%80)
 - [前置准备](#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87)
     - [底层组件要求](#%E5%BA%95%E5%B1%82%E7%BB%84%E4%BB%B6%E8%A6%81%E6%B1%82)
@@ -17,6 +24,36 @@
     - [每日签到任务, 签到后消失, 第二天重新出现](#%E6%AF%8F%E6%97%A5%E7%AD%BE%E5%88%B0%E4%BB%BB%E5%8A%A1-%E7%AD%BE%E5%88%B0%E5%90%8E%E6%B6%88%E5%A4%B1-%E7%AC%AC%E4%BA%8C%E5%A4%A9%E9%87%8D%E6%96%B0%E5%87%BA%E7%8E%B0)
 
 <!-- /TOC -->
+
+# common_button 是什么	
+
+common_button 是一个通用按钮库, 用于快速方便的创建app上使用的一些按钮. 运营可以在不对app发版的情况下增加/删除/修改按钮.	
+
+for 客户端: 统一接口, 一次对接, 多场景适配.	
+for 后台: 一次开发, 东哥配置好实现多场景复用.	
+for 运营: 统一管理, 功能广泛, 使用门槛低.	
+
+![](./assets/button1.png)![](./assets/button2.png)![](./assets/button3.png)	
+
+---	
+
+# 术语	
+
+## module 模块	
+
+module 表示一个业务下的一个模块划分, 比如`商城/论坛/用户中心`表示不同的模块	
+
+## scene 场景/页面	
+
+scene 表示不同的场景/页面, 比如用户中心的`个人信息/用户协议`表示不同的页面. 也可以用来区分同一个页面中的不同位置.	
+
+## button 按钮	
+
+button 表示一个场景/页面上可以点击的按钮, 这些简单的按钮不能有复杂的业务逻辑	
+
+## task_template 任务模板	
+
+task_template 用于定义一个任务类型, 比如 跳转/签到/第三方任务, 它是开发者决定的.
 
 ## task 任务
 
