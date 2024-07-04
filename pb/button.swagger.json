@@ -304,8 +304,7 @@
       "type": "object",
       "properties": {
         "prizeId": {
-          "type": "integer",
-          "format": "int32",
+          "type": "string",
           "title": "奖品id"
         },
         "prizeName": {
@@ -404,10 +403,11 @@
       "enum": [
         "TASK_PERIOD_TYPE_NONE",
         "TASK_PERIOD_TYPE_DAY",
-        "TASK_PERIOD_TYPE_WEEK"
+        "TASK_PERIOD_TYPE_WEEK",
+        "TASK_PERIOD_TYPE_MONTH"
       ],
       "default": "TASK_PERIOD_TYPE_NONE",
-      "description": "- TASK_PERIOD_TYPE_NONE: 无周期\n - TASK_PERIOD_TYPE_DAY: 自然日\n - TASK_PERIOD_TYPE_WEEK: 自然周",
+      "description": "- TASK_PERIOD_TYPE_NONE: 无周期\n - TASK_PERIOD_TYPE_DAY: 自然日\n - TASK_PERIOD_TYPE_WEEK: 自然周\n - TASK_PERIOD_TYPE_MONTH: 自然月",
       "title": "任务周期类型"
     },
     "common_buttonTaskState": {

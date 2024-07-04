@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/zly-app/cache/v2"
 	"github.com/zly-app/component/redis"
 	"github.com/zly-app/component/sqlx"
 	"github.com/zly-app/zapp/core"
@@ -9,21 +10,28 @@ import (
 )
 
 var (
-	sqlxCreator      sqlx.ISqlx
-	ButtonSqlxClient sqlx.Client
-
-	redisCreator        redis.IRedisCreator
-	TaskDataRedisClient redis.UniversalClient
+	sqlxCreator  sqlx.ISqlx
+	redisCreator redis.IRedisCreator
+	cacheCreator cache.ICacheCreator
 )
 
 func Init(app core.IApp) {
-	redisCreator = redis.NewRedisCreator(app)
-	TaskDataRedisClient = redisCreator.GetRedis(conf.Conf.ButtonTaskDataRedisName)
-
 	sqlxCreator = sqlx.NewSqlx(app)
-	ButtonSqlxClient = sqlxCreator.GetSqlx(conf.Conf.ButtonSqlxName)
+	redisCreator = redis.NewRedisCreator(app)
+	cacheCreator = cache.NewCacheCreator(app)
 }
 func Close() {
 	sqlxCreator.Close()
 	redisCreator.Close()
+	cacheCreator.Close()
+}
+
+func GetButtonSqlx() sqlx.Client {
+	return sqlxCreator.GetSqlx(conf.Conf.ButtonSqlxName)
+}
+func GetButtonTaskDataRedis() redis.UniversalClient {
+	return redisCreator.GetRedis(conf.Conf.ButtonTaskDataRedisName)
+}
+func GetUserTaskDataCache() cache.ICache {
+	return cacheCreator.GetCache(conf.Conf.UserTaskDataCacheName)
 }

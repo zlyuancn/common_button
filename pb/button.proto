@@ -3,7 +3,6 @@ package common_button; // 决定proto引用路径和rpc路由
 option go_package = "github.com/zlyuancn/common_button/pb"; // 用于对golang包管理的定位
 
 import "google/api/annotations.proto";  // 添加导入
-import "validate/validate.proto";
 
 // 通用按钮服务
 service CommonButtonService{
@@ -103,7 +102,7 @@ message ClickTaskState {
 
 // 奖品
 message Prize {
-  int32 prize_id = 1; // 奖品id
+  string prize_id = 1; // 奖品id
   string prize_name = 2; // 奖品名称
   string prize_url = 3; // 奖品图片url
 }
@@ -120,6 +119,7 @@ enum TaskPeriodType {
   TASK_PERIOD_TYPE_NONE = 0; // 无周期
   TASK_PERIOD_TYPE_DAY = 1; // 自然日
   TASK_PERIOD_TYPE_WEEK = 2; // 自然周
+  TASK_PERIOD_TYPE_MONTH = 3; // 自然月
 }
 
 // 任务隐藏规则

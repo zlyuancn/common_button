@@ -9,6 +9,7 @@
     - [task_template 任务模板](#task_template-%E4%BB%BB%E5%8A%A1%E6%A8%A1%E6%9D%BF)
     - [task 任务](#task-%E4%BB%BB%E5%8A%A1)
 - [高性能秘诀](#%E9%AB%98%E6%80%A7%E8%83%BD%E7%A7%98%E8%AF%80)
+    - [用户任务数据储存](#%E7%94%A8%E6%88%B7%E4%BB%BB%E5%8A%A1%E6%95%B0%E6%8D%AE%E5%82%A8%E5%AD%98)
 - [前置准备](#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87)
     - [底层组件要求](#%E5%BA%95%E5%B1%82%E7%BB%84%E4%BB%B6%E8%A6%81%E6%B1%82)
     - [sql文件导入](#sql%E6%96%87%E4%BB%B6%E5%AF%BC%E5%85%A5)
@@ -93,6 +94,10 @@ B ->> A: rsp
 end
 ```
 
+## 用户任务数据储存
+
+用户数据储存到redis, 每个用户的每个key为一条string数据, 其key基于按钮id+用户id
+
 ---
 
 # 前置准备
@@ -118,6 +123,7 @@ common_button:
    ReloadButtonIntervalSec: 60 # 重新加载按钮数据的间隔时间, 单位秒
    ButtonTaskDataRedisName: 'common_button' # 按钮任务数据的redis组件名
    ButtonGrpcGatewayClientName: 'common_button' # grpc网关客户端组件名
+   UserTaskDataCacheName: '' # 用户任务数据缓存组件名
 
 # 依赖组件
 components:
@@ -133,6 +139,12 @@ components:
    grpc: # 参考 https://github.com/zly-app/grpc/tree/master/client
       common_button:
          Address: localhost:3000
+         # ...
+   cache:
+      common_button.user_task_data: # 用户任务数据缓存
+         Serializer: sonic_std
+         CacheDB:
+            Type: bigcache
          # ...
 
 services:
@@ -153,13 +165,12 @@ package main
 
 import (
 	"github.com/zly-app/grpc"
-	"github.com/zly-app/uapp"
 
 	_ "github.com/zlyuancn/common_button"
 )
 
 func main() {
-	app := uapp.NewApp("zapp.test.common_button",
+	app := zapp.NewApp("zapp.test.common_button",
 		grpc.WithService(),
 		grpc.WithGatewayService(),
 	)

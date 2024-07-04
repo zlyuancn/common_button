@@ -3,11 +3,11 @@ module github.com/zlyuancn/common_button
 go 1.20
 
 require (
-	github.com/envoyproxy/protoc-gen-validate v1.0.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/samber/lo v1.44.0
 	github.com/spf13/cast v1.3.1
+	github.com/zly-app/cache/v2 v2.0.6
 	github.com/zly-app/component/redis v0.0.0-20240621094636-7da56cc660c1
 	github.com/zly-app/component/sqlx v0.0.0-20240621094636-7da56cc660c1
 	github.com/zly-app/grpc v0.4.6
@@ -21,12 +21,14 @@ require (
 
 require (
 	github.com/ClickHouse/clickhouse-go v1.4.7 // indirect
+	github.com/allegro/bigcache/v3 v3.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.11.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
 	github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58 // indirect
+	github.com/coocood/freecache v1.2.1 // indirect
 	github.com/denisenkom/go-mssqldb v0.10.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
@@ -44,6 +46,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.10.3 // indirect

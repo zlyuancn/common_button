@@ -19,7 +19,7 @@ func loadAllModule(ctx context.Context) ([]*ButtonModuleModel, error) {
 	const cond = `select module_id,module_name from common_button_module`
 
 	var ret []*ButtonModuleModel
-	err := client.ButtonSqlxClient.Find(ctx, &ret, cond)
+	err := client.GetButtonSqlx().Find(ctx, &ret, cond)
 	return ret, err
 }
 
@@ -33,7 +33,7 @@ func loadAllScene(ctx context.Context) ([]*ButtonSceneModel, error) {
 	const cond = `select module_id,scene_id,scene_name from common_button_scene`
 
 	var ret []*ButtonSceneModel
-	err := client.ButtonSqlxClient.Find(ctx, &ret, cond)
+	err := client.GetButtonSqlx().Find(ctx, &ret, cond)
 	return ret, err
 }
 
@@ -63,7 +63,7 @@ func loadAllButton(ctx context.Context) ([]*ButtonModel, error) {
 	var cond = `select ` + buttonSelectField + ` from common_button where enabled=1`
 
 	var ret []*ButtonModel
-	err := client.ButtonSqlxClient.Find(ctx, &ret, cond)
+	err := client.GetButtonSqlx().Find(ctx, &ret, cond)
 	return ret, err
 }
 
@@ -81,5 +81,5 @@ func getModelSelectField(model interface{}) string {
 			selectAllFields = append(selectAllFields, field.Tag.Get("db"))
 		}
 	}
-	return strings.Join(selectAllFields, ",")
+	return strings.Join(selectAllFields, ", ")
 }

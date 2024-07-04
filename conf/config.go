@@ -3,12 +3,11 @@ package conf
 const ConfigKey = "common_button"
 
 const (
-	defButtonSqlxName          = "common_button"
-	defReloadButtonIntervalSec = 60
-
-	defButtonTaskDataRedisName = "common_button"
-
+	defButtonSqlxName              = "common_button"
+	defReloadButtonIntervalSec     = 60
+	defButtonTaskDataRedisName     = "common_button"
 	defButtonGrpcGatewayClientName = "common_button"
+	defUserTaskDataCacheName       = "common_button.user_task_data"
 )
 
 var Conf = Config{
@@ -16,6 +15,7 @@ var Conf = Config{
 	ReloadButtonIntervalSec:     defReloadButtonIntervalSec,
 	ButtonTaskDataRedisName:     defButtonTaskDataRedisName,
 	ButtonGrpcGatewayClientName: defButtonGrpcGatewayClientName,
+	UserTaskDataCacheName:       defUserTaskDataCacheName,
 }
 
 type Config struct {
@@ -23,6 +23,7 @@ type Config struct {
 	ReloadButtonIntervalSec     int    // 重新加载按钮数据的间隔时间, 单位秒
 	ButtonTaskDataRedisName     string // 按钮任务数据的redis组件名
 	ButtonGrpcGatewayClientName string // grpc网关客户端组件名
+	UserTaskDataCacheName       string // 用户任务数据缓存组件名
 }
 
 func (conf *Config) Check() {
@@ -37,5 +38,8 @@ func (conf *Config) Check() {
 	}
 	if conf.ButtonGrpcGatewayClientName == "" {
 		conf.ButtonGrpcGatewayClientName = defButtonGrpcGatewayClientName
+	}
+	if conf.UserTaskDataCacheName == "" {
+		conf.UserTaskDataCacheName = defUserTaskDataCacheName
 	}
 }

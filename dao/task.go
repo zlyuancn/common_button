@@ -26,10 +26,10 @@ var taskSelectField = getModelSelectField(TaskModel{})
 
 // 获取所有任务
 func loadAllTask(ctx context.Context) ([]*TaskModel, error) {
-	var cond = `select ` + taskSelectField + ` from common_task`
+	var cond = `select ` + taskSelectField + ` from common_task where end_time > now()`
 
 	var ret []*TaskModel
-	err := client.ButtonSqlxClient.Find(ctx, &ret, cond)
+	err := client.GetButtonSqlx().Find(ctx, &ret, cond)
 	return ret, err
 }
 
@@ -49,6 +49,6 @@ func loadAllTaskTemplate(ctx context.Context) ([]*TaskTemplateModel, error) {
 	var cond = `select ` + taskTemplateSelectField + ` from common_task_template`
 
 	var ret []*TaskTemplateModel
-	err := client.ButtonSqlxClient.Find(ctx, &ret, cond)
+	err := client.GetButtonSqlx().Find(ctx, &ret, cond)
 	return ret, err
 }

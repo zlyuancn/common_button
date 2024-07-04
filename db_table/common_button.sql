@@ -46,8 +46,8 @@ create unique index button_scene_unique_index on common_button_scene (`module_id
 create table common_task
 (
     `id`          int unsigned auto_increment             not null primary key comment '任务id',
-    `module_id`   int unsigned  default 0                 not null comment '用于区分业务模块',
-    `scene_id`    int unsigned  default 0                 not null comment '业务下的场景/页面id',
+    `module_id`   int unsigned  default 0                 not null comment '用于区分业务模块, 在业务逻辑中不会检查这个字段与button匹配',
+    `scene_id`    int unsigned  default 0                 not null comment '业务下的场景/页面id, 在业务逻辑中不会检查这个字段与button匹配',
     `template_id` int unsigned  default 0                 not null comment '模板id',
     `start_time`  datetime                                not null comment '任务开始时间',
     `end_time`    datetime                                not null comment '任务结束时间',
@@ -62,11 +62,12 @@ create table common_task
 ) comment ='通用任务';
 
 create index button_moduel_scene_index on common_task (`module_id`, `scene_id`);
+create index button_end_time_index on common_task (`end_time`);
 
 create table common_task_template
 (
     `id`          int unsigned auto_increment   not null primary key comment '任务模板id',
-    `period_type` tinyint unsigned default 0    not null comment '任务周期：0=无周期 1=自然日 2=自然周',
+    `period_type` tinyint unsigned default 0    not null comment '任务周期：0=无周期 1=自然日 2=自然周 3=自然月',
     `task_type`   tinyint unsigned default 0    not null comment '任务类型：1=跳转任务 2=签到',
     `extend`      varchar(8192)    default '{}' not null comment '扩展数据, 一般用于存放任务模板数据的参数, 这些参数是开发者决定的, 比如第三方任务的id和secret',
     -- 以下字段无业务逻辑, 或者是透传到客户端字段

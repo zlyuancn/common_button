@@ -29,7 +29,7 @@ func init() {
 	})
 	zapp.AddHandler(zapp.AfterInitializeHandler, func(app core.IApp, handlerType handler.HandlerType) {
 		client.Init(app)
-		dao.StartLoopLoad()
+		dao.Init()
 	})
 	zapp.AddHandler(zapp.BeforeStartHandler, func(app core.IApp, handlerType handler.HandlerType) {
 		grpc.RegistryServerHandler(func(ctx context.Context, server grpc.ServiceRegistrar) {
