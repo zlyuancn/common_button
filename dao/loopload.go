@@ -17,6 +17,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/zlyuancn/common_button/conf"
+	"github.com/zlyuancn/common_button/dao/common_button"
 	"github.com/zlyuancn/common_button/pb"
 )
 
@@ -61,7 +62,7 @@ func loadAllButtonTask(ctx context.Context) (*buttonTaskMap, error) {
 
 func loadTasksPB(ctx context.Context) (map[int32]*pb.Task, map[string]*pb.Prize, error) {
 	// 加载任务
-	taskList, err := loadAllTask(ctx)
+	taskList, err := common_button.LoadAllTask(ctx)
 	if err != nil {
 		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllTask err", zap.Error(err))
 		return nil, nil, err
@@ -84,12 +85,12 @@ func loadTasksPB(ctx context.Context) (map[int32]*pb.Task, map[string]*pb.Prize,
 	}
 
 	// 加载任务模板
-	taskTemplateList, err := loadAllTaskTemplate(ctx)
+	taskTemplateList, err := common_button.LoadAllTaskTemplate(ctx)
 	if err != nil {
 		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllTaskTemplate err", zap.Error(err))
 		return nil, nil, err
 	}
-	taskTemplateMM := lo.SliceToMap(taskTemplateList, func(t *TaskTemplateModel) (int32, *TaskTemplateModel) {
+	taskTemplateMM := lo.SliceToMap(taskTemplateList, func(t *common_button.TaskTemplateModel) (int32, *common_button.TaskTemplateModel) {
 		return int32(t.ID), t
 	})
 
@@ -150,7 +151,7 @@ func loadTasksPB(ctx context.Context) (map[int32]*pb.Task, map[string]*pb.Prize,
 	}
 	return ret, prizeMM, nil
 }
-func parseTaskPrizeIDs(ctx context.Context, t *TaskModel) ([]string, error) {
+func parseTaskPrizeIDs(ctx context.Context, t *common_button.TaskModel) ([]string, error) {
 	if t.PrizeIds == "" {
 		return nil, nil
 	}
@@ -195,7 +196,7 @@ func loadPrizePB(ctx context.Context, prizeIDs []string) (map[string]*pb.Prize, 
 	return ret, nil
 }
 
-func genButtonPB(ctx context.Context, b *ButtonModel, taskMM map[int32]*pb.Task) (*pb.Button, error) {
+func genButtonPB(ctx context.Context, b *common_button.ButtonModel, taskMM map[int32]*pb.Task) (*pb.Button, error) {
 	ret := &pb.Button{
 		ModuleId:     pb.ButtonModuleID(b.ModuleID),
 		SceneId:      pb.ButtonSceneID(b.SceneID),
@@ -227,19 +228,19 @@ func loadButtonPB(ctx context.Context, taskMM map[int32]*pb.Task) (
 	map[pb.ButtonModuleID]map[pb.ButtonSceneID][]*pb.Button, map[int32]*pb.Button, error,
 ) {
 	// 加载module
-	moduleList, err := loadAllModule(ctx)
+	moduleList, err := common_button.LoadAllModule(ctx)
 	if err != nil {
 		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllModule err", zap.Error(err))
 		return nil, nil, err
 	}
 	// 加载scene
-	sceneList, err := loadAllScene(ctx)
+	sceneList, err := common_button.LoadAllScene(ctx)
 	if err != nil {
 		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllScene err", zap.Error(err))
 		return nil, nil, err
 	}
 	// 加载按钮
-	buttonList, err := loadAllButton(ctx)
+	buttonList, err := common_button.LoadAllButton(ctx)
 	if err != nil {
 		logger.Error(ctx, "common_button call loadAllButtonTask call loadAllButton err", zap.Error(err))
 		return nil, nil, err
