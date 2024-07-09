@@ -1,4 +1,4 @@
-package dao
+package loopload
 
 import (
 	"context"
@@ -18,6 +18,7 @@ import (
 
 	"github.com/zlyuancn/common_button/conf"
 	"github.com/zlyuancn/common_button/dao/common_button"
+	"github.com/zlyuancn/common_button/dao/prize_repo"
 	"github.com/zlyuancn/common_button/pb"
 )
 
@@ -29,7 +30,7 @@ type buttonTaskMap struct {
 	PrizeMapping             map[string]*pb.Prize                                    // 奖品映射
 }
 
-func startLoopLoad() {
+func StartLoopLoad() {
 	t := time.Duration(conf.Conf.ReloadButtonIntervalSec) * time.Second
 	ButtonTaskMap = loopload.New("common_button", loadAllButtonTask, loopload.WithReloadTime(t))
 }
@@ -175,7 +176,7 @@ func loadPrizePB(ctx context.Context, prizeIDs []string) (map[string]*pb.Prize, 
 	for i := range prizeIDs {
 		id := prizeIDs[i]
 		fns = append(fns, func() error {
-			v, err := prizeIDParse(ctx, id)
+			v, err := prize_repo.ParsePrizeID(ctx, id)
 			if err != nil {
 				return fmt.Errorf("common_button prizeIDParse err. prizeID=%s, err=%v", id, err)
 			}

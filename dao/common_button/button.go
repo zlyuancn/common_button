@@ -29,6 +29,7 @@ type ButtonSceneModel struct {
 	SceneName string `db:"scene_name"` // 场景名
 }
 
+// 获取所有业务场景/页面
 func LoadAllScene(ctx context.Context) ([]*ButtonSceneModel, error) {
 	const cond = `select module_id,scene_id,scene_name from common_button_scene`
 

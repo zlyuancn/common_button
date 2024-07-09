@@ -12,7 +12,7 @@ import (
 
 	"github.com/zlyuancn/common_button/client"
 	"github.com/zlyuancn/common_button/conf"
-	"github.com/zlyuancn/common_button/dao"
+	"github.com/zlyuancn/common_button/dao/loopload"
 	"github.com/zlyuancn/common_button/pb"
 	"github.com/zlyuancn/common_button/view"
 )
@@ -29,7 +29,7 @@ func init() {
 	})
 	zapp.AddHandler(zapp.AfterInitializeHandler, func(app core.IApp, handlerType handler.HandlerType) {
 		client.Init(app)
-		dao.Init()
+		loopload.StartLoopLoad()
 	})
 	zapp.AddHandler(zapp.BeforeStartHandler, func(app core.IApp, handlerType handler.HandlerType) {
 		grpc.RegistryServerHandler(func(ctx context.Context, server grpc.ServiceRegistrar) {

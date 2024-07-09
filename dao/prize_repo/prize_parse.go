@@ -1,4 +1,4 @@
-package dao
+package prize_repo
 
 import (
 	"context"
@@ -24,4 +24,9 @@ func defPrizeIDParse(ctx context.Context, prizeID string) (*pb.Prize, error) {
 		PrizeUrl:  "",
 	}
 	return ret, nil
+}
+
+// 解析奖品id
+func ParsePrizeID(ctx context.Context, prizeID string) (*pb.Prize, error) {
+	return prizeIDParse(ctx, prizeID)
 }
