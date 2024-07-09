@@ -14,16 +14,20 @@ type ButtonRepo interface {
 	GetButtonByID(ctx context.Context, buttonID int32) (*pb.Button, error)
 }
 
-type buttonRepo struct{}
+var defButtonRepo ButtonRepo = buttonRepoImpl{}
 
-func (buttonRepo) GetButtonsByModuleAndScene(ctx context.Context, moduleID pb.ButtonModuleID, sceneIDs []pb.ButtonSceneID) ([]*pb.Button, error) {
+func SetButtonRepo(repo ButtonRepo) {
+	defButtonRepo = repo
+}
+func GetButtonRepo() ButtonRepo {
+	return defButtonRepo
+}
+
+type buttonRepoImpl struct{}
+
+func (buttonRepoImpl) GetButtonsByModuleAndScene(ctx context.Context, moduleID pb.ButtonModuleID, sceneIDs []pb.ButtonSceneID) ([]*pb.Button, error) {
 	return loopload.GetButtonsByModuleAndScene(ctx, moduleID, sceneIDs)
 }
-
-func (buttonRepo) GetButtonByID(ctx context.Context, buttonID int32) (*pb.Button, error) {
+func (buttonRepoImpl) GetButtonByID(ctx context.Context, buttonID int32) (*pb.Button, error) {
 	return loopload.GetButtonByID(ctx, buttonID)
-}
-
-func NewButtonRepo() ButtonRepo {
-	return buttonRepo{}
 }

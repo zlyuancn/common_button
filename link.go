@@ -4,5 +4,5 @@ import (
 	"github.com/zlyuancn/common_button/dao/prize_repo"
 )
 
-// 设置奖品解析函数
-var SetPrizeIDParseFn = prize_repo.SetPrizeIDParseFn
+// 设置奖品仓库
+var SetPrizeRepo = prize_repo.SetRepo

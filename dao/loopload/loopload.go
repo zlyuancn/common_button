@@ -176,7 +176,7 @@ func loadPrizePB(ctx context.Context, prizeIDs []string) (map[string]*pb.Prize, 
 	for i := range prizeIDs {
 		id := prizeIDs[i]
 		fns = append(fns, func() error {
-			v, err := prize_repo.ParsePrizeID(ctx, id)
+			v, err := prize_repo.GetRepo().ParsePrizeID(ctx, id)
 			if err != nil {
 				return fmt.Errorf("common_button prizeIDParse err. prizeID=%s, err=%v", id, err)
 			}

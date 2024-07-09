@@ -117,7 +117,7 @@ end
 ## sql文件导入
 
 1. 首先准备一个库名为 `common_button` 的mysql库. 这个库名可以根据sqlx组件配置的连接db库修改
-2. 创建导入相关表, 表文件在[这里](./db_table/common_button.sql)
+2. 创建导入相关表, 表文件在[这里](./assets/db_table/common_button.sql)
 
 ## 修改配置文件
 

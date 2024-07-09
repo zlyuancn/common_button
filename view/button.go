@@ -16,7 +16,7 @@ type implCli struct {
 }
 
 func (implCli) GetButtonList(ctx context.Context, req *pb.GetButtonListReq) (*pb.GetButtonListRsp, error) {
-	bs, err := dao.NewButtonRepo().GetButtonsByModuleAndScene(ctx, req.ModuleId, req.SceneId)
+	bs, err := dao.GetButtonRepo().GetButtonsByModuleAndScene(ctx, req.ModuleId, req.SceneId)
 	if err != nil {
 		logger.Error(ctx, "GetButtonList call GetButtonsByModuleAndScene err", zap.Any("req", req), zap.Error(err))
 		return nil, err
