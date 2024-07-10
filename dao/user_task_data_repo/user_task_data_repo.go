@@ -40,6 +40,10 @@ func GetRepo() Repo {
 type repoImpl struct{}
 
 func (r repoImpl) MultiGet(ctx context.Context, uid string, buttonIDs []int32) (map[int32]*model.UserTaskData, error) {
+	if len(buttonIDs) == 0 {
+		return nil, nil
+	}
+
 	keys := lo.Map(buttonIDs, func(buttonID int32, _ int) string {
 		return r.genTaskDataKey(uid, buttonID)
 	})
@@ -69,8 +73,26 @@ func (r repoImpl) MultiGet(ctx context.Context, uid string, buttonIDs []int32) (
 }
 
 func (r repoImpl) MultiUpdate(ctx context.Context, uid string, data map[int32]*model.UserTaskData) error {
-	//TODO implement me
-	panic("implement me")
+	if len(data) == 0 {
+		return nil
+	}
+
+	values := make([]interface{}, len(data)*2)
+	for id, td := range data {
+		key := r.genTaskDataKey(uid, id)
+		text, err := sonic.MarshalString(td)
+		if err != nil {
+			logger.Error(ctx, "MultiUpdate call MarshalString err", zap.String("uid", uid), zap.Int32("buttonID", id), zap.Any("td", td), zap.Error(err))
+			return err
+		}
+		values = append(values, key, text)
+	}
+	err := client.GetUserTaskDataRedis().MSet(ctx, values...).Err()
+	if err != nil {
+		logger.Error(ctx, "MultiUpdate call MSet err", zap.String("uid", uid), zap.Any("values", values), zap.Error(err))
+		return err
+	}
+	return nil
 }
 
 // 生成任务数据key
