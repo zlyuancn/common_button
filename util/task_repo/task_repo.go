@@ -2,6 +2,7 @@ package task_repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mohae/deepcopy"
 	"github.com/samber/lo"
@@ -12,7 +13,7 @@ import (
 	"github.com/zlyuancn/common_button/model"
 	"github.com/zlyuancn/common_button/pb"
 	"github.com/zlyuancn/common_button/util/task"
-	"github.com/zlyuancn/common_button/util/task_progress_repo"
+	"github.com/zlyuancn/common_button/util/task_progress"
 	"github.com/zlyuancn/common_button/util/user_repo"
 )
 
@@ -73,22 +74,30 @@ func (r repoImpl) MultiRenderTasksStatus(ctx context.Context, buttons []*pb.Butt
 	}
 
 	// 过滤需要隐藏的按钮
-	buttons = lo.Filter(buttons, func(btn *pb.Button, index int) bool {
-		// 没有任务直接通过
+	ret := make([]*pb.Button, 0, len(buttons))
+	for _, btn := range buttons {
 		if btn.Task == nil {
-			return true
+			ret = append(ret, btn)
+			continue
 		}
 
 		t, ok := taskMM[btn.Task.TaskId]
 		if !ok {
 			// 理论上不会走到这个case
 			logger.Error(ctx, "MultiRenderTasksStatus abnormal. not found task.", zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn))
-			return false
+			return nil, fmt.Errorf("MultiRenderTasksStatus abnormal. not found task. btnID=%d, taskID=%d", btn.ButtonId, btn.Task.TaskId)
 		}
 
-		return !t.IsHide(ctx)
-	})
-	return buttons, nil
+		hide, err := t.IsHide(ctx)
+		if err != nil {
+			logger.Error(ctx, "MultiRenderTasksStatus abnormal. check task IsHide err.", zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn), zap.Error(err))
+			return nil, fmt.Errorf("MultiRenderTasksStatus abnormal. check task IsHide err. btnID=%d, taskID=%d, err=%v", btn.ButtonId, btn.Task.TaskId, err)
+		}
+		if !hide {
+			ret = append(ret, btn)
+		}
+	}
+	return ret, nil
 }
 
 func (repoImpl) processTasks(ctx context.Context, uid string, taskMM map[int32]task.Task) error {
@@ -111,14 +120,14 @@ func (repoImpl) processTasks(ctx context.Context, uid string, taskMM map[int32]t
 		taskTypeMM[btn.Task.TaskType] = append(taskTypeMM[btn.Task.TaskType], t)
 	}
 
-	// 批量刷新进度(有效期检查,任务进度检查,计算隐藏)
+	// 批量刷新进度
 	for tt, tasks := range taskTypeMM {
 		if len(tasks) == 0 {
 			continue
 		}
 
 		// 查询进度
-		progress, err := task_progress_repo.GetRepo().MultiQueryTaskProgress(ctx, tt, tasks)
+		progress, err := task_progress.MultiQueryTaskProgress(ctx, tt, tasks)
 		if err != nil {
 			logger.Error(ctx, "processTasks call task_progress_repo.GetRepo().MultiQueryTaskProgress err", zap.String("uid", uid), zap.Int32("taskType", int32(tt)), zap.Error(err))
 			return err

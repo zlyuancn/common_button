@@ -116,9 +116,10 @@ enum ButtonSceneID {
 // 任务周期类型
 enum TaskPeriodType {
   TASK_PERIOD_TYPE_NONE = 0; // 无周期
-  TASK_PERIOD_TYPE_DAY = 1; // 自然日
-  TASK_PERIOD_TYPE_WEEK = 2; // 自然周
-  TASK_PERIOD_TYPE_MONTH = 3; // 自然月
+  TASK_PERIOD_TYPE_DAY_UTC8 = 1; // 自然日
+  TASK_PERIOD_TYPE_WEEK_0_UTC8 = 2; // 自然周(第一天是周日)
+  TASK_PERIOD_TYPE_WEEK_1_UTC8 = 3; // 自然周(第一天是周一)
+  TASK_PERIOD_TYPE_MONTH_UTC8 = 4; // 自然月
 }
 
 // 任务隐藏规则
@@ -140,5 +141,4 @@ enum TaskFinishStatus {
   TASK_FINISH_STATUS_UNFINISHED = 0; // 未完成
   TASK_FINISH_STATUS_FINISHED = 1; // 已完成
   TASK_FINISH_STATUS_RECEIVED = 2; // 已领取
-  TASK_FINISH_STATUS_HIDED = 3; // 已隐藏
 }

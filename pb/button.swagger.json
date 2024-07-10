@@ -376,11 +376,10 @@
       "enum": [
         "TASK_FINISH_STATUS_UNFINISHED",
         "TASK_FINISH_STATUS_FINISHED",
-        "TASK_FINISH_STATUS_RECEIVED",
-        "TASK_FINISH_STATUS_HIDED"
+        "TASK_FINISH_STATUS_RECEIVED"
       ],
       "default": "TASK_FINISH_STATUS_UNFINISHED",
-      "description": "- TASK_FINISH_STATUS_UNFINISHED: 未完成\n - TASK_FINISH_STATUS_FINISHED: 已完成\n - TASK_FINISH_STATUS_RECEIVED: 已领取\n - TASK_FINISH_STATUS_HIDED: 已隐藏",
+      "description": "- TASK_FINISH_STATUS_UNFINISHED: 未完成\n - TASK_FINISH_STATUS_FINISHED: 已完成\n - TASK_FINISH_STATUS_RECEIVED: 已领取",
       "title": "任务完成状态"
     },
     "common_buttonTaskHideRule": {
@@ -398,12 +397,13 @@
       "type": "string",
       "enum": [
         "TASK_PERIOD_TYPE_NONE",
-        "TASK_PERIOD_TYPE_DAY",
-        "TASK_PERIOD_TYPE_WEEK",
-        "TASK_PERIOD_TYPE_MONTH"
+        "TASK_PERIOD_TYPE_DAY_UTC8",
+        "TASK_PERIOD_TYPE_WEEK_0_UTC8",
+        "TASK_PERIOD_TYPE_WEEK_1_UTC8",
+        "TASK_PERIOD_TYPE_MONTH_UTC8"
       ],
       "default": "TASK_PERIOD_TYPE_NONE",
-      "description": "- TASK_PERIOD_TYPE_NONE: 无周期\n - TASK_PERIOD_TYPE_DAY: 自然日\n - TASK_PERIOD_TYPE_WEEK: 自然周\n - TASK_PERIOD_TYPE_MONTH: 自然月",
+      "description": "- TASK_PERIOD_TYPE_NONE: 无周期\n - TASK_PERIOD_TYPE_DAY_UTC8: 自然日\n - TASK_PERIOD_TYPE_WEEK_0_UTC8: 自然周(第一天是周日)\n - TASK_PERIOD_TYPE_WEEK_1_UTC8: 自然周(第一天是周一)\n - TASK_PERIOD_TYPE_MONTH_UTC8: 自然月",
       "title": "任务周期类型"
     },
     "common_buttonTaskState": {

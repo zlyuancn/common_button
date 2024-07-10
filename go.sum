@@ -541,8 +541,8 @@ github.com/zlyuancn/zbalancer v1.1.0 h1:bDs59eIkEXUVTdwMKd6pko2PBAEgAw7TgIQwzzYZ
 github.com/zlyuancn/zbalancer v1.1.0/go.mod h1:c8hq0Lig8lOqqXD7YLqPJOFsNROGG5I6N+6AbuutBYI=
 github.com/zlyuancn/zretry v0.0.0-20220514032503-d78bfd22a441 h1:Sw0KI54iN5+zLL74vWx9R1o9S1yWc+f3oRKOjKrMCqA=
 github.com/zlyuancn/zretry v0.0.0-20220514032503-d78bfd22a441/go.mod h1:nXpt3JELMAirMyc5KExlSX96ixpohjHkxHpJlhqRnUU=
-github.com/zlyuancn/zutils v0.0.0-20231227021140-f376aa4846f0 h1:Mw8GmEbDORlj0x2RNxh4y3guBXN+5zmMeSYpCpSHSQI=
-github.com/zlyuancn/zutils v0.0.0-20231227021140-f376aa4846f0/go.mod h1:Yiud7A5xwU2/bgiQ2DYEn2T17wBZfss9DYMB2AvkHEA=
+github.com/zlyuancn/zutils v0.0.0-20240710092024-0b40857d46af h1:DTneHe5Eu45FyEXhvWxbu8zquPU0M/0TDSTwgoq01us=
+github.com/zlyuancn/zutils v0.0.0-20240710092024-0b40857d46af/go.mod h1:Yiud7A5xwU2/bgiQ2DYEn2T17wBZfss9DYMB2AvkHEA=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/etcd/api/v3 v3.5.0/go.mod h1:cbVKeC6lCfl7j/8jBhAK6aIYO9XOjdptoxU/nLQcPvs=
 go.etcd.io/etcd/client/pkg/v3 v3.5.0/go.mod h1:IJHfcCEKxYu1Os13ZdwCwIUTUVGYTSAM3YSwc9/Ac1g=

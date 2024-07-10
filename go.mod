@@ -3,6 +3,7 @@ module github.com/zlyuancn/common_button
 go 1.20
 
 require (
+	github.com/bytedance/sonic v1.11.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.20.0
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/samber/lo v1.44.0
@@ -13,6 +14,7 @@ require (
 	github.com/zly-app/grpc v0.4.6
 	github.com/zly-app/utils/loopload v0.0.0-20240702071244-39f1f746f028
 	github.com/zly-app/zapp v1.3.15
+	github.com/zlyuancn/zutils v0.0.0-20240710092024-0b40857d46af
 	go.uber.org/zap v1.27.0
 	google.golang.org/genproto v0.0.0-20230209215440-0dfe4f8abfcc
 	google.golang.org/grpc v1.64.0
@@ -23,7 +25,6 @@ require (
 	github.com/ClickHouse/clickhouse-go v1.4.7 // indirect
 	github.com/allegro/bigcache/v3 v3.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bytedance/sonic v1.11.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
@@ -85,7 +86,6 @@ require (
 	github.com/zlyuancn/connpool v0.0.0-20240529080113-fdbaa79cba97 // indirect
 	github.com/zlyuancn/zbalancer v1.1.0 // indirect
 	github.com/zlyuancn/zretry v0.0.0-20220514032503-d78bfd22a441 // indirect
-	github.com/zlyuancn/zutils v0.0.0-20231227021140-f376aa4846f0 // indirect
 	go.opentelemetry.io/otel v1.16.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
