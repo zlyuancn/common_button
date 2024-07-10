@@ -64,7 +64,7 @@ func (r repoImpl) MultiRenderTasksStatus(ctx context.Context, buttons []*pb.Butt
 
 	// 处理任务
 	taskMM := lo.SliceToMap(taskButtons, func(btn *pb.Button) (int32, task.Task) {
-		td := tds[btn.Task.TaskId]
+		td := tds[btn.ButtonId] // 这里数据必然存在
 		return btn.Task.TaskId, task.NewTask(btn, td)
 	})
 	err = r.processTasks(ctx, uid, taskMM)
