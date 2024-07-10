@@ -2,6 +2,7 @@ package prize_repo
 
 import (
 	"context"
+	"errors"
 
 	"github.com/zlyuancn/common_button/pb"
 )
@@ -23,10 +24,5 @@ func GetRepo() Repo {
 type repoImpl struct{}
 
 func (repoImpl) ParsePrizeID(ctx context.Context, prizeID string) (*pb.Prize, error) {
-	ret := &pb.Prize{
-		PrizeId:   prizeID,
-		PrizeName: "id=" + prizeID,
-		PrizeUrl:  "",
-	}
-	return ret, nil
+	return nil, errors.New("please call common_button.SetPrizeRepo(repo)")
 }

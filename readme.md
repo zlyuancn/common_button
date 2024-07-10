@@ -128,7 +128,8 @@ end
 common_button:
    ButtonSqlxName: 'common_button' # 按钮的sqlx组件名
    ReloadButtonIntervalSec: 60 # 重新加载按钮数据的间隔时间, 单位秒
-   ButtonTaskDataRedisName: 'common_button' # 按钮任务数据的redis组件名
+   UserTaskDataRedisName: 'common_button' # 用户任务数据的redis组件名
+   UserTaskDataKeyFormat: '{<uid>}:<btn_id>:common_button.user_task_data' # 用户任务数据key格式化字符串
    ButtonGrpcGatewayClientName: 'common_button' # grpc网关客户端组件名
    UserTaskDataCacheName: '' # 用户任务数据缓存组件名
 
@@ -215,6 +216,9 @@ func main() {
 
 1. 在业务模块表 `common_button_module` 中新增本次需求的业务模块, 后续重复使用.
 2. 在业务场景/页面表 `common_button_scene` 中新增本次需求的业务场景/页面, 后续重复使用.
+3. 在 `main` 函数中注册相关repo. 要求注册代码放在 `app.Run()` 之前
+   1. 调用`common_button.SetUserRepo(repo)` 设置用户仓库
+   2. 调用`common_button.SetPrizeRepo(repo)` 设置奖品仓库
 
 运营
 

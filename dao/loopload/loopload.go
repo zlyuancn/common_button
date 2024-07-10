@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mohae/deepcopy"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
 	"github.com/zly-app/utils/loopload"
@@ -314,8 +313,6 @@ func GetButtonsByModuleAndScene(ctx context.Context, moduleID pb.ButtonModuleID,
 		}
 		ret = append(ret, bs...)
 	}
-
-	ret = deepcopy.Copy(ret).([]*pb.Button) // 此处必须深拷贝, 因为后面大概率会修改数据
 	return ret, nil
 }
 

@@ -103,8 +103,7 @@ message ClickTaskState {
 // 奖品
 message Prize {
   string prize_id = 1; // 奖品id
-  string prize_name = 2; // 奖品名称
-  string prize_url = 3; // 奖品图片url
+  string prize_data = 2; // 奖品数据
 }
 
 enum ButtonModuleID {

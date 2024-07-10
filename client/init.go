@@ -29,8 +29,8 @@ func Close() {
 func GetButtonSqlx() sqlx.Client {
 	return sqlxCreator.GetSqlx(conf.Conf.ButtonSqlxName)
 }
-func GetButtonTaskDataRedis() redis.UniversalClient {
-	return redisCreator.GetRedis(conf.Conf.ButtonTaskDataRedisName)
+func GetUserTaskDataRedis() redis.UniversalClient {
+	return redisCreator.GetRedis(conf.Conf.UserTaskDataRedisName)
 }
 func GetUserTaskDataCache() cache.ICache {
 	return cacheCreator.GetCache(conf.Conf.UserTaskDataCacheName)

@@ -9,16 +9,23 @@ import (
 
 	"github.com/zlyuancn/common_button/dao"
 	"github.com/zlyuancn/common_button/pb"
+	"github.com/zlyuancn/common_button/util/task_repo"
 )
 
 type implCli struct {
 	pb.UnimplementedCommonButtonServiceServer
 }
 
-func (implCli) GetButtonList(ctx context.Context, req *pb.GetButtonListReq) (*pb.GetButtonListRsp, error) {
+func (impl implCli) GetButtonList(ctx context.Context, req *pb.GetButtonListReq) (*pb.GetButtonListRsp, error) {
 	bs, err := dao.GetButtonRepo().GetButtonsByModuleAndScene(ctx, req.ModuleId, req.SceneId)
 	if err != nil {
 		logger.Error(ctx, "GetButtonList call GetButtonsByModuleAndScene err", zap.Any("req", req), zap.Error(err))
+		return nil, err
+	}
+
+	bs, err = task_repo.GetRepo().MultiRenderTasksStatus(ctx, bs)
+	if err != nil {
+		logger.Error(ctx, "GetButtonList call renderTaskStatus err", zap.Any("req", req), zap.Error(err))
 		return nil, err
 	}
 

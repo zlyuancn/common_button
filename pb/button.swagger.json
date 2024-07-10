@@ -307,13 +307,9 @@
           "type": "string",
           "title": "奖品id"
         },
-        "prizeName": {
+        "prizeData": {
           "type": "string",
-          "title": "奖品名称"
-        },
-        "prizeUrl": {
-          "type": "string",
-          "title": "奖品图片url"
+          "title": "奖品数据"
         }
       },
       "title": "奖品"
