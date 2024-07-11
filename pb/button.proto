@@ -97,7 +97,6 @@ message ClickTaskState {
   int32 task_id = 2; // 任务id
   TaskFinishStatus finish_status = 3; // 任务完成状态
   repeated Prize prizes = 4; // 奖品列表
-  string skip_title = 5; // 新的跳转按钮标题
 }
 
 // 奖品
@@ -133,7 +132,7 @@ enum TaskHideRule {
 enum TaskType {
   TASK_TYPE_UNKNOWN = 0;
   TASK_TYPE_JUMP = 1; // 跳转任务
-  TASK_TYPE_CHECKIN = 2; // 签到
+  TASK_TYPE_CHECKIN = 2; // 签到(直接完成)
 }
 
 // 任务完成状态
@@ -141,4 +140,5 @@ enum TaskFinishStatus {
   TASK_FINISH_STATUS_UNFINISHED = 0; // 未完成
   TASK_FINISH_STATUS_FINISHED = 1; // 已完成
   TASK_FINISH_STATUS_RECEIVED = 2; // 已领取
+  TASK_FINISH_STATUS_Hide = 3; // 已隐藏
 }

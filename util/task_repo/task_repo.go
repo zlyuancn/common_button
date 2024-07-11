@@ -2,9 +2,9 @@ package task_repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/mohae/deepcopy"
 	"github.com/samber/lo"
 	"github.com/zly-app/zapp/logger"
 	"go.uber.org/zap"
@@ -18,8 +18,12 @@ import (
 )
 
 type Repo interface {
-	// 批量渲染任务数据
-	MultiRenderTasksStatus(ctx context.Context, buttons []*pb.Button) ([]*pb.Button, error)
+	// 批量获取任务状态
+	MultiGetTasksStatus(ctx context.Context, buttons []*pb.Button) (map[int32]task.Task, error)
+	// 获取单个任务状态
+	GetOneTaskStatus(ctx context.Context, button *pb.Button) (task.Task, error)
+	// 点击一个按钮扭转状态
+	ClickOneButton(ctx context.Context, button *pb.Button) (task.Task, error)
 }
 
 var defRepo Repo = repoImpl{}
@@ -33,20 +37,17 @@ func GetRepo() Repo {
 
 type repoImpl struct{}
 
-func (r repoImpl) MultiRenderTasksStatus(ctx context.Context, buttons []*pb.Button) ([]*pb.Button, error) {
+func (r repoImpl) MultiGetTasksStatus(ctx context.Context, buttons []*pb.Button) (map[int32]task.Task, error) {
 	buttonIDs := make([]int32, 0)
 	taskButtons := make([]*pb.Button, 0)
-	for i, b := range buttons {
+	for _, b := range buttons {
 		if b.Task != nil {
-			b = deepcopy.Copy(b).(*pb.Button) // 带任务的按钮会修改数据, 这里必须深拷贝
-			buttons[i] = b                    // 回写
-
 			buttonIDs = append(buttonIDs, b.ButtonId)
 			taskButtons = append(taskButtons, b)
 		}
 	}
 	if len(buttonIDs) == 0 {
-		return buttons, nil
+		return nil, nil
 	}
 
 	// 解析uid
@@ -55,6 +56,20 @@ func (r repoImpl) MultiRenderTasksStatus(ctx context.Context, buttons []*pb.Butt
 		logger.Error(ctx, "MultiRenderTasksStatus call user_repo.GetRepo().ParseUID err", zap.Error(err))
 		return nil, err
 	}
+
+	// 加锁
+	unlock, ok, err := user_task_data_repo.GetRepo().LockUser(ctx, uid)
+	if err != nil {
+		logger.Error(ctx, "MultiRenderTasksStatus call user_task_data_repo.GetRepo().LockUser err", zap.Error(err))
+		return nil, err
+	}
+	if !ok {
+		err = errors.New("get lock err")
+		logger.Error(ctx, "MultiRenderTasksStatus call user_task_data_repo.GetRepo().LockUser err", zap.Error(err))
+		return nil, err
+	}
+	defer unlock(ctx)
+
 	// 获取用户任务数据
 	tds, err := user_task_data_repo.GetRepo().MultiGet(ctx, uid, buttonIDs)
 	if err != nil {
@@ -65,7 +80,7 @@ func (r repoImpl) MultiRenderTasksStatus(ctx context.Context, buttons []*pb.Butt
 	// 处理任务
 	taskMM := lo.SliceToMap(taskButtons, func(btn *pb.Button) (int32, task.Task) {
 		td := tds[btn.ButtonId] // 这里数据必然存在
-		return btn.Task.TaskId, task.NewTask(btn, td)
+		return btn.Task.TaskId, task.NewTask(uid, btn, td)
 	})
 	err = r.processTasks(ctx, uid, taskMM)
 	if err != nil {
@@ -73,31 +88,7 @@ func (r repoImpl) MultiRenderTasksStatus(ctx context.Context, buttons []*pb.Butt
 		return nil, err
 	}
 
-	// 过滤需要隐藏的按钮
-	ret := make([]*pb.Button, 0, len(buttons))
-	for _, btn := range buttons {
-		if btn.Task == nil {
-			ret = append(ret, btn)
-			continue
-		}
-
-		t, ok := taskMM[btn.Task.TaskId]
-		if !ok {
-			// 理论上不会走到这个case
-			logger.Error(ctx, "MultiRenderTasksStatus abnormal. not found task.", zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn))
-			return nil, fmt.Errorf("MultiRenderTasksStatus abnormal. not found task. btnID=%d, taskID=%d", btn.ButtonId, btn.Task.TaskId)
-		}
-
-		hide, err := t.IsHide(ctx)
-		if err != nil {
-			logger.Error(ctx, "MultiRenderTasksStatus abnormal. check task IsHide err.", zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn), zap.Error(err))
-			return nil, fmt.Errorf("MultiRenderTasksStatus abnormal. check task IsHide err. btnID=%d, taskID=%d, err=%v", btn.ButtonId, btn.Task.TaskId, err)
-		}
-		if !hide {
-			ret = append(ret, btn)
-		}
-	}
-	return ret, nil
+	return taskMM, nil
 }
 
 func (repoImpl) processTasks(ctx context.Context, uid string, taskMM map[int32]task.Task) error {
@@ -145,10 +136,141 @@ func (repoImpl) processTasks(ctx context.Context, uid string, taskMM map[int32]t
 			needPersistenceUserTaskData[t.GetButton().ButtonId] = t.GetUserTaskData()
 		}
 	}
+	if len(needPersistenceUserTaskData) == 0 {
+		return nil
+	}
 	err := user_task_data_repo.GetRepo().MultiUpdate(ctx, uid, needPersistenceUserTaskData)
 	if err != nil {
 		logger.Error(ctx, "processTasks call user_task_data_repo.GetRepo().MultiUpdate err", zap.String("uid", uid), zap.Error(err))
 		return err
 	}
 	return nil
+}
+
+func (r repoImpl) GetOneTaskStatus(ctx context.Context, btn *pb.Button) (task.Task, error) {
+	if btn.Task == nil {
+		return nil, fmt.Errorf("button not task. buttonID=%d", btn.ButtonId)
+	}
+
+	// 解析uid
+	uid, err := user_repo.GetRepo().ParseUID(ctx)
+	if err != nil {
+		logger.Error(ctx, "GetOneTaskStatus call user_repo.GetRepo().ParseUID err", zap.Error(err))
+		return nil, err
+	}
+
+	// 加锁
+	unlock, ok, err := user_task_data_repo.GetRepo().LockUser(ctx, uid)
+	if err != nil {
+		logger.Error(ctx, "GetOneTaskStatus call user_task_data_repo.GetRepo().LockUser err", zap.Error(err))
+		return nil, err
+	}
+	if !ok {
+		err = errors.New("get lock err")
+		logger.Error(ctx, "GetOneTaskStatus call user_task_data_repo.GetRepo().LockUser err", zap.Error(err))
+		return nil, err
+	}
+	defer unlock(ctx)
+
+	// 获取用户任务数据
+	td, err := user_task_data_repo.GetRepo().Get(ctx, uid, btn.ButtonId)
+	if err != nil {
+		logger.Error(ctx, "GetOneTaskStatus call user_task_data_repo.GetRepo().Get err", zap.String("uid", uid), zap.Int32("buttonID", btn.ButtonId), zap.Error(err))
+		return nil, err
+	}
+
+	t := task.NewTask(uid, btn, td)
+	err = r.processOneTask(ctx, uid, t)
+	if err != nil {
+		logger.Error(ctx, "GetOneTaskStatus call this.processOneTask err", zap.Error(err))
+		return nil, err
+	}
+	return t, nil
+}
+
+func (repoImpl) processOneTask(ctx context.Context, uid string, t task.Task) error {
+	// 更新周期
+	err := t.UpdatePeriod(ctx)
+	if err != nil {
+		logger.Error(ctx, "processOneTask call t.UpdatePeriod err", zap.String("uid", uid), zap.Error(err))
+		return err
+	}
+
+	// 查询进度
+	tt := t.GetButton().Task.TaskType
+	progress, err := task_progress.MultiQueryTaskProgress(ctx, t.GetButton().Task.TaskType, []task.Task{t})
+	if err != nil {
+		logger.Error(ctx, "processOneTask call task_progress_repo.GetRepo().MultiQueryTaskProgress err", zap.String("uid", uid), zap.Int32("taskType", int32(tt)), zap.Error(err))
+		return err
+	}
+	// 更新进度
+	t.SetNewProgress(ctx, progress[0])
+
+	// 持久化需要更新的任务数据
+	if !t.IsNeedPersistence(ctx) {
+		return nil
+	}
+	err = user_task_data_repo.GetRepo().Update(ctx, uid, t.GetButton().ButtonId, t.GetUserTaskData())
+	if err != nil {
+		logger.Error(ctx, "processOneTask call user_task_data_repo.GetRepo().Update err", zap.String("uid", uid), zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (r repoImpl) ClickOneButton(ctx context.Context, btn *pb.Button) (task.Task, error) {
+	if btn.Task == nil {
+		return nil, fmt.Errorf("button not task. buttonID=%d", btn.ButtonId)
+	}
+
+	// 解析uid
+	uid, err := user_repo.GetRepo().ParseUID(ctx)
+	if err != nil {
+		logger.Error(ctx, "ClickOneButton call user_repo.GetRepo().ParseUID err", zap.Error(err))
+		return nil, err
+	}
+
+	// 加锁
+	unlock, ok, err := user_task_data_repo.GetRepo().LockUser(ctx, uid)
+	if err != nil {
+		logger.Error(ctx, "ClickOneButton call user_task_data_repo.GetRepo().LockUser err", zap.Error(err))
+		return nil, err
+	}
+	if !ok {
+		err = errors.New("get lock err")
+		logger.Error(ctx, "ClickOneButton call user_task_data_repo.GetRepo().LockUser err", zap.Error(err))
+		return nil, err
+	}
+	defer unlock(ctx)
+
+	// 获取用户任务数据
+	td, err := user_task_data_repo.GetRepo().Get(ctx, uid, btn.ButtonId)
+	if err != nil {
+		logger.Error(ctx, "ClickOneButton call user_task_data_repo.GetRepo().Get err", zap.String("uid", uid), zap.Int32("buttonID", btn.ButtonId), zap.Error(err))
+		return nil, err
+	}
+
+	t := task.NewTask(uid, btn, td)
+	err = r.processOneTask(ctx, uid, t)
+	if err != nil {
+		logger.Error(ctx, "ClickOneButton call this.processOneTask err", zap.Error(err))
+		return nil, err
+	}
+
+	err = t.ClickButton(ctx)
+	if err != nil {
+		logger.Error(ctx, "ClickOneButton call task.ClickButton err", zap.Int32("buttonID", btn.ButtonId), zap.Error(err))
+		return nil, err
+	}
+
+	// click后需要重新持久化
+	if !t.IsNeedPersistence(ctx) {
+		return t, nil
+	}
+	err = user_task_data_repo.GetRepo().Update(ctx, uid, t.GetButton().ButtonId, t.GetUserTaskData())
+	if err != nil {
+		logger.Error(ctx, "ClickOneButton call user_task_data_repo.GetRepo().Update err", zap.String("uid", uid), zap.Error(err))
+		return t, err
+	}
+	return t, nil
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/zly-app/zapp/logger"
 	"go.uber.org/zap"
 
+	"github.com/zlyuancn/common_button/dao/prize_repo"
 	"github.com/zlyuancn/common_button/model"
 	"github.com/zlyuancn/common_button/pb"
 	"github.com/zlyuancn/common_button/util/hide_rule"
@@ -17,7 +18,7 @@ type Task interface {
 	GetButton() *pb.Button
 	GetUserTaskData() *model.UserTaskData
 
-	// 判断是否需要持久化
+	// 判断是否需要持久化, 会立即清除需要持久化标记
 	IsNeedPersistence(ctx context.Context) bool
 	// 判断是否隐藏
 	IsHide(ctx context.Context) (bool, error)
@@ -28,9 +29,13 @@ type Task interface {
 	UpdatePeriod(ctx context.Context) error
 	// 设置新进度
 	SetNewProgress(ctx context.Context, progress int32)
+
+	// 点击按钮扭转状态
+	ClickButton(ctx context.Context) error
 }
 
 type BaseTask struct {
+	uid             string
 	btn             *pb.Button
 	td              *model.UserTaskData
 	needPersistence bool
@@ -45,7 +50,9 @@ func (b *BaseTask) GetUserTaskData() *model.UserTaskData {
 }
 
 func (b *BaseTask) IsNeedPersistence(ctx context.Context) bool {
-	return b.needPersistence
+	ret := b.needPersistence
+	b.needPersistence = false
+	return ret
 }
 
 func (b *BaseTask) IsHide(ctx context.Context) (bool, error) {
@@ -79,7 +86,6 @@ func (b *BaseTask) UpdatePeriod(ctx context.Context) error {
 		FinishStatus: pb.TaskFinishStatus_TASK_FINISH_STATUS_UNFINISHED,
 	}
 	b.needPersistence = true
-	b.fillTaskState()
 	return nil
 }
 
@@ -101,16 +107,29 @@ func (b *BaseTask) SetNewProgress(ctx context.Context, progress int32) {
 		b.td.FinishStatus = pb.TaskFinishStatus_TASK_FINISH_STATUS_FINISHED
 		b.needPersistence = true
 	}
-
-	b.fillTaskState()
 }
 
-// 填充任务状态
-func (b *BaseTask) fillTaskState() {
-	b.btn.TaskState = &pb.TaskState{
-		TaskProgress: b.td.Progress,
-		FinishStatus: b.td.FinishStatus,
+func (b *BaseTask) ClickButton(ctx context.Context) error {
+	// 特殊处理. 对跳转类型增加完成度
+	switch b.btn.Task.TaskType {
+	case pb.TaskType_TASK_TYPE_JUMP:
+		progress := b.td.Progress + 1
+		b.SetNewProgress(ctx, progress)
 	}
+
+	// 发货
+	if b.td.FinishStatus == pb.TaskFinishStatus_TASK_FINISH_STATUS_FINISHED && len(b.btn.Task.Prizes) > 0 {
+		err := prize_repo.GetRepo().SendPrize(ctx, b.uid, b.btn)
+		if err != nil {
+			logger.Error(ctx, "ClickButton call prize_repo.GetRepo().SendPrize err", zap.String("uid", b.uid), zap.Int32("buttonID", b.btn.ButtonId), zap.Error(err))
+			return err
+		}
+
+		b.td.FinishStatus = pb.TaskFinishStatus_TASK_FINISH_STATUS_RECEIVED
+		b.needPersistence = true
+	}
+
+	return nil
 }
 
 // 是否有效
@@ -122,11 +141,11 @@ func (b *BaseTask) taskIsValid() bool {
 	return false
 }
 
-var NewTask = func(btn *pb.Button, td *model.UserTaskData) Task {
+var NewTask = func(uid string, btn *pb.Button, td *model.UserTaskData) Task {
 	ret := &BaseTask{
+		uid: uid,
 		btn: btn,
 		td:  td,
 	}
-	ret.fillTaskState()
 	return ret
 }

@@ -237,10 +237,6 @@
             "$ref": "#/definitions/common_buttonPrize"
           },
           "title": "奖品列表"
-        },
-        "skipTitle": {
-          "type": "string",
-          "title": "新的跳转按钮标题"
         }
       },
       "title": "点击后返回的任务状态"
@@ -376,10 +372,11 @@
       "enum": [
         "TASK_FINISH_STATUS_UNFINISHED",
         "TASK_FINISH_STATUS_FINISHED",
-        "TASK_FINISH_STATUS_RECEIVED"
+        "TASK_FINISH_STATUS_RECEIVED",
+        "TASK_FINISH_STATUS_Hide"
       ],
       "default": "TASK_FINISH_STATUS_UNFINISHED",
-      "description": "- TASK_FINISH_STATUS_UNFINISHED: 未完成\n - TASK_FINISH_STATUS_FINISHED: 已完成\n - TASK_FINISH_STATUS_RECEIVED: 已领取",
+      "description": "- TASK_FINISH_STATUS_UNFINISHED: 未完成\n - TASK_FINISH_STATUS_FINISHED: 已完成\n - TASK_FINISH_STATUS_RECEIVED: 已领取\n - TASK_FINISH_STATUS_Hide: 已隐藏",
       "title": "任务完成状态"
     },
     "common_buttonTaskHideRule": {
@@ -429,7 +426,7 @@
         "TASK_TYPE_CHECKIN"
       ],
       "default": "TASK_TYPE_UNKNOWN",
-      "description": "- TASK_TYPE_JUMP: 跳转任务\n - TASK_TYPE_CHECKIN: 签到",
+      "description": "- TASK_TYPE_JUMP: 跳转任务\n - TASK_TYPE_CHECKIN: 签到(直接完成)",
       "title": "任务类型"
     },
     "protobufAny": {

@@ -50,7 +50,7 @@ type checkinProgress struct{}
 func (n checkinProgress) MultiQueryTaskProgress(ctx context.Context, tasks []task.Task) ([]int32, error) {
 	ret := make([]int32, len(tasks))
 	for i := 0; i < len(ret); i++ {
-		ret[i] = 1
+		ret[i] = tasks[i].GetButton().Task.TaskTarget
 	}
 	return ret, nil
 }
