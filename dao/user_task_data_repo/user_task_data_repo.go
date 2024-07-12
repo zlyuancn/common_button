@@ -3,12 +3,12 @@ package user_task_data_repo
 import (
 	"context"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/bytedance/sonic"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
-	"github.com/zly-app/component/redis"
 	"github.com/zly-app/zapp/logger"
 	"go.uber.org/zap"
 
@@ -30,10 +30,6 @@ type Repo interface {
 	MultiGet(ctx context.Context, uid string, buttonIDs []int32) (map[int32]*model.UserTaskData, error)
 	// 批量更新任务数据
 	MultiUpdate(ctx context.Context, uid string, tds map[int32]*model.UserTaskData) error
-	// 获取单个任务数据
-	Get(ctx context.Context, uid string, buttonID int32) (*model.UserTaskData, error)
-	// 更新单个任务数据
-	Update(ctx context.Context, uid string, buttonID int32, td *model.UserTaskData) error
 }
 
 var defRepo Repo = repoImpl{}
@@ -62,7 +58,12 @@ func (r repoImpl) LockUser(ctx context.Context, uid string) (func(ctx context.Co
 	if !ok {
 		return nil, false, nil
 	}
+
+	var isUnlock int32 // unlock只能执行一次
 	unlock := func(ctx context.Context) {
+		if !atomic.CompareAndSwapInt32(&isUnlock, 0, 1) {
+			return
+		}
 		nowTime := time.Now().UnixNano()
 		if time.Duration(nowTime-startTime) > expireTime/2 { // 如果超过一半过期时间则不解锁
 			return
@@ -126,42 +127,6 @@ func (r repoImpl) MultiUpdate(ctx context.Context, uid string, tds map[int32]*mo
 	err := client.GetUserTaskDataRedis().MSet(ctx, values...).Err()
 	if err != nil {
 		logger.Error(ctx, "MultiUpdate call MSet err", zap.String("uid", uid), zap.Any("values", values), zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-func (r repoImpl) Get(ctx context.Context, uid string, buttonID int32) (*model.UserTaskData, error) {
-	key := r.genTaskDataKey(uid, buttonID)
-	v, err := client.GetUserTaskDataRedis().Get(ctx, key).Result()
-	if err == redis.Nil {
-		return &model.UserTaskData{}, nil
-	}
-	if err != nil {
-		logger.Error(ctx, "Call redis.Get err", zap.String("uid", uid), zap.String("key", key), zap.Error(err))
-		return nil, err
-	}
-
-	td := model.UserTaskData{}
-	err = sonic.UnmarshalString(cast.ToString(v), &td)
-	if err != nil {
-		logger.Error(ctx, "Call UnmarshalString err", zap.String("v", cast.ToString(v)), zap.Error(err))
-		return nil, err
-	}
-	return &td, nil
-}
-
-func (r repoImpl) Update(ctx context.Context, uid string, buttonID int32, td *model.UserTaskData) error {
-	key := r.genTaskDataKey(uid, buttonID)
-	text, err := sonic.MarshalString(td)
-	if err != nil {
-		logger.Error(ctx, "call MarshalString err", zap.String("uid", uid), zap.Int32("buttonID", buttonID), zap.Any("td", td), zap.Error(err))
-		return err
-	}
-
-	err = client.GetUserTaskDataRedis().Set(ctx, key, text, 0).Err()
-	if err != nil {
-		logger.Error(ctx, "call Set err", zap.String("uid", uid), zap.String("key", key), zap.String("value", text), zap.Error(err))
 		return err
 	}
 	return nil
