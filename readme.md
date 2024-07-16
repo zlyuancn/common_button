@@ -128,11 +128,12 @@ common_button:
    ButtonSqlxName: 'common_button' # 按钮的sqlx组件名
    ReloadButtonIntervalSec: 60 # 重新加载按钮数据的间隔时间, 单位秒
    UserTaskDataRedisName: 'common_button' # 用户任务数据的redis组件名
-   UserTaskDataKeyFormat: '{<uid>}:<btn_id>:common_button.user_task_data' # 用户任务数据key格式化字符串
-   UserOpLockKeyFormat: '{<uid>}:common_button.user_op_lock' # 用户操作加锁key格式化字符串
+   UserTaskDataKeyFormat: 'common_button.user_task_data:{<uid>}:<btn_id>' # 用户任务数据key格式化字符串
+   UseUserTaskDataCache: true # 是否使用用户数据缓存. 注意, 在使用分布式系统的情况下, 开启缓存注意将同一个用户的请求分配到同一个节点中
+   UserTaskDataCacheName: 'common_button.user_task_data' # 用户任务数据缓存组件名
+   UserOpLockKeyFormat: 'common_button.user_op_lock:{<uid>}' # 用户操作加锁key格式化字符串
    UserOpLockTimeSec: 10 # 用户操作加锁时间, 单位秒, 在redis中如果操作时间小于其一半时间会调用unlock解锁否则只能等待自动过期
    ButtonGrpcGatewayClientName: 'common_button' # grpc网关客户端组件名
-   UserTaskDataCacheName: '' # 用户任务数据缓存组件名
 
 # 依赖组件
 components:

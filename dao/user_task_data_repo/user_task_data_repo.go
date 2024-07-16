@@ -9,6 +9,7 @@ import (
 	"github.com/bytedance/sonic"
 	"github.com/samber/lo"
 	"github.com/spf13/cast"
+	"github.com/zly-app/cache/v2"
 	"github.com/zly-app/zapp/logger"
 	"go.uber.org/zap"
 
@@ -80,31 +81,65 @@ func (r repoImpl) MultiGet(ctx context.Context, uid string, buttonIDs []int32) (
 	if len(buttonIDs) == 0 {
 		return nil, nil
 	}
+	ret := make(map[int32]*model.UserTaskData, len(buttonIDs))
 
-	keys := lo.Map(buttonIDs, func(buttonID int32, _ int) string {
+	allKeys := lo.Map(buttonIDs, func(buttonID int32, _ int) string {
 		return r.genTaskDataKey(uid, buttonID)
 	})
-	val, err := client.GetUserTaskDataRedis().MGet(ctx, keys...).Result()
+	needQueryKeys := allKeys
+	needQueryButtonIDs := buttonIDs
+
+	// 使用缓存, 这里仅考虑使用了本地缓存, 从本地缓存获取数据无需并发
+	if conf.Conf.UseUserTaskDataCache {
+		needQueryKeys = make([]string, 0, len(buttonIDs))
+		needQueryButtonIDs = make([]int32, 0, len(buttonIDs))
+		td := model.UserTaskData{}
+		for i := range allKeys {
+			err := client.GetUserTaskDataCache().Get(ctx, allKeys[i], &td)
+			if err == cache.ErrCacheMiss {
+				needQueryKeys = append(needQueryKeys, allKeys[i])
+				needQueryButtonIDs = append(needQueryButtonIDs, buttonIDs[i])
+				continue
+			}
+			if err != nil {
+				logger.Error(ctx, "MultiGet Call cache.Get err", zap.String("key", allKeys[i]), zap.Error(err))
+				return nil, err
+			}
+			id := buttonIDs[i]
+			ret[id] = &td
+		}
+		if len(needQueryKeys) == 0 {
+			return ret, nil
+		}
+	}
+
+	val, err := client.GetUserTaskDataRedis().MGet(ctx, needQueryKeys...).Result()
 	if err != nil {
-		logger.Error(ctx, "MultiGet Call redis.MGet err", zap.String("uid", uid), zap.Strings("keys", keys), zap.Error(err))
+		logger.Error(ctx, "MultiGet Call redis.MGet err", zap.String("uid", uid), zap.Strings("allKeys", needQueryKeys), zap.Error(err))
 		return nil, err
 	}
 
-	ret := make(map[int32]*model.UserTaskData, len(buttonIDs))
 	for i, v := range val {
-		id := buttonIDs[i]
-		if v == nil {
-			ret[id] = &model.UserTaskData{}
-			continue
+		id := needQueryButtonIDs[i]
+		td := model.UserTaskData{}
+		if v != nil {
+			err := sonic.UnmarshalString(cast.ToString(v), &td)
+			if err != nil {
+				logger.Error(ctx, "MultiGet Call UnmarshalString err", zap.String("v", cast.ToString(v)), zap.Error(err))
+				return nil, err
+			}
 		}
 
-		td := model.UserTaskData{}
-		err := sonic.UnmarshalString(cast.ToString(v), &td)
-		if err != nil {
-			logger.Error(ctx, "MultiGet Call UnmarshalString err", zap.String("v", cast.ToString(v)), zap.Error(err))
-			return nil, err
-		}
 		ret[id] = &td
+
+		// 写入到缓存中
+		if conf.Conf.UseUserTaskDataCache {
+			err = client.GetUserTaskDataCache().Set(ctx, needQueryKeys[i], &td)
+			if err != nil {
+				logger.Error(ctx, "MultiGet Call cache.Set err", zap.String("key", needQueryKeys[i]), zap.Error(err))
+				return nil, err
+			}
+		}
 	}
 	return ret, nil
 }
@@ -128,6 +163,18 @@ func (r repoImpl) MultiUpdate(ctx context.Context, uid string, tds map[int32]*mo
 	if err != nil {
 		logger.Error(ctx, "MultiUpdate call MSet err", zap.String("uid", uid), zap.Any("values", values), zap.Error(err))
 		return err
+	}
+
+	// 写入到缓存中, 这里仅考虑使用了本地缓存, 从本地缓存获取数据无需并发
+	if conf.Conf.UseUserTaskDataCache {
+		for id, td := range tds {
+			key := r.genTaskDataKey(uid, id)
+			err = client.GetUserTaskDataCache().Set(ctx, key, &td)
+			if err != nil {
+				logger.Error(ctx, "MultiUpdate Call cache.Set err", zap.String("key", key), zap.Error(err))
+				return err
+			}
+		}
 	}
 	return nil
 }

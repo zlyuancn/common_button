@@ -18,12 +18,16 @@ var (
 func Init(app core.IApp) {
 	sqlxCreator = sqlx.NewSqlx(app)
 	redisCreator = redis.NewRedisCreator(app)
-	cacheCreator = cache.NewCacheCreator(app)
+	if conf.Conf.UseUserTaskDataCache {
+		cacheCreator = cache.NewCacheCreator(app)
+	}
 }
 func Close() {
 	sqlxCreator.Close()
 	redisCreator.Close()
-	cacheCreator.Close()
+	if cacheCreator != nil {
+		cacheCreator.Close()
+	}
 }
 
 func GetButtonSqlx() sqlx.Client {
