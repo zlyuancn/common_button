@@ -93,8 +93,8 @@ func (r repoImpl) MultiGet(ctx context.Context, uid string, buttonIDs []int32) (
 	if conf.Conf.UseUserTaskDataCache {
 		needQueryKeys = make([]string, 0, len(buttonIDs))
 		needQueryButtonIDs = make([]int32, 0, len(buttonIDs))
-		td := model.UserTaskData{}
 		for i := range allKeys {
+			td := model.UserTaskData{}
 			err := client.GetUserTaskDataCache().Get(ctx, allKeys[i], &td)
 			if err == cache.ErrCacheMiss {
 				needQueryKeys = append(needQueryKeys, allKeys[i])

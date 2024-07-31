@@ -159,8 +159,9 @@ components:
 
 services:
    grpc: # 参考 https://github.com/zly-app/grpc
-      Bind: :3000 # bind地址
-      # ...
+      common_button:
+         Bind: :3000 # bind地址
+         # ...
    grpc-gateway: # 网关配置
       Bind: :8080 # bind地址
       # ...

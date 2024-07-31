@@ -10,7 +10,6 @@ import (
 	"github.com/zly-app/zapp/handler"
 	"go.uber.org/zap"
 
-	"github.com/zlyuancn/common_button/client"
 	"github.com/zlyuancn/common_button/conf"
 	"github.com/zlyuancn/common_button/dao/loopload"
 	"github.com/zlyuancn/common_button/pb"
@@ -20,6 +19,8 @@ import (
 func init() {
 	config.RegistryApolloNeedParseNamespace(conf.ConfigKey)
 
+	loopload.StartLoopLoad()
+
 	zapp.AddHandler(zapp.BeforeInitializeHandler, func(app core.IApp, handlerType handler.HandlerType) {
 		err := app.GetConfig().Parse(conf.ConfigKey, &conf.Conf, true)
 		if err != nil {
@@ -27,18 +28,10 @@ func init() {
 		}
 		conf.Conf.Check()
 	})
-	zapp.AddHandler(zapp.AfterInitializeHandler, func(app core.IApp, handlerType handler.HandlerType) {
-		client.Init(app)
-		loopload.StartLoopLoad()
-	})
 	zapp.AddHandler(zapp.BeforeStartHandler, func(app core.IApp, handlerType handler.HandlerType) {
-		grpc.RegistryServerHandler(func(ctx context.Context, server grpc.ServiceRegistrar) {
-			pb.RegisterCommonButtonServiceServer(server, view.NewButtonService())
-		})
+		pb.RegisterCommonButtonServiceServer(grpc.Server("common_button"), view.NewButtonService())
+
 		grpcClient := pb.NewCommonButtonServiceClient(grpc.GetGatewayClientConn(conf.Conf.ButtonGrpcGatewayClientName))
 		_ = pb.RegisterCommonButtonServiceHandlerClient(context.Background(), grpc.GetGatewayMux(), grpcClient)
-	})
-	zapp.AddHandler(zapp.AfterExitHandler, func(app core.IApp, handlerType handler.HandlerType) {
-		client.Close()
 	})
 }
