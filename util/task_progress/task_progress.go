@@ -41,7 +41,7 @@ func MultiQueryTaskProgress(ctx context.Context, taskType pb.TaskType, tasks []t
 type noneProgress struct{}
 
 func (n noneProgress) MultiQueryTaskProgress(ctx context.Context, tasks []task.Task) ([]int32, error) {
-	ret := make([]int32, 0)
+	ret := make([]int32, len(tasks))
 	return ret, nil
 }
 

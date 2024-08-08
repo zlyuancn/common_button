@@ -175,15 +175,12 @@ services:
 package main
 
 import (
-	"github.com/zly-app/grpc"
-
-	_ "github.com/zlyuancn/common_button"
+	"github.com/zlyuancn/common_button"
 )
 
 func main() {
 	app := zapp.NewApp("zapp.test.common_button",
-		grpc.WithService(),
-		grpc.WithGatewayService(),
+      common_button.WithService(),
 	)
 	defer app.Exit()
 
