@@ -95,7 +95,8 @@ func (r repoImpl) processTasks(ctx context.Context, uid string, taskMM map[int32
 		}
 		// 更新进度
 		for i := range tasks {
-			tasks[i].SetNewProgress(ctx, progress[i])
+			btnID := tasks[i].GetButton().ButtonId
+			tasks[i].SetNewProgress(ctx, progress[btnID])
 		}
 	}
 

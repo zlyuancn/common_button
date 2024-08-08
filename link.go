@@ -11,13 +11,13 @@ import (
 	"github.com/zlyuancn/common_button/util/user_repo"
 )
 
-// 设置按钮仓库
+// 设置按钮仓库, 一般不需要使用
 var SetButtonRepo = dao.SetButtonRepo
 
-// 设置用户任务数据仓库
+// 设置用户任务数据仓库, 一般不需要使用
 var SetUserTaskDataRepo = user_task_data_repo.SetRepo
 
-// 设置任务仓库
+// 设置任务仓库, 一般不需要使用
 var SetTaskRepo = task_repo.SetRepo
 
 // 设置奖品仓库
