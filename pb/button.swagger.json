@@ -125,7 +125,7 @@
           "title": "模块id"
         },
         "sceneId": {
-          "$ref": "#/definitions/common_buttonButtonSceneID",
+          "type": "string",
           "title": "场景id"
         },
         "buttonId": {
@@ -188,13 +188,6 @@
       ],
       "default": "BUTTON_MODULE_ID_UNKNOWN"
     },
-    "common_buttonButtonSceneID": {
-      "type": "string",
-      "enum": [
-        "BUTTON_SCENE_ID_UNKNOWN"
-      ],
-      "default": "BUTTON_SCENE_ID_UNKNOWN"
-    },
     "common_buttonClickButtonReq": {
       "type": "object",
       "properties": {
@@ -251,7 +244,7 @@
         "sceneId": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/common_buttonButtonSceneID"
+            "type": "string"
           },
           "title": "区分场景id, 空列表表示拉取全部场景"
         }
@@ -278,7 +271,7 @@
           "title": "区分业务id"
         },
         "sceneId": {
-          "$ref": "#/definitions/common_buttonButtonSceneID",
+          "type": "string",
           "title": "区分场景id, 空列表表示拉取全部场景"
         }
       }

@@ -10,7 +10,7 @@ import (
 type TaskModel struct {
 	ID         uint      `db:"id"`          //"任务id"
 	ModuleID   uint      `db:"module_id"`   //"用于区分业务模块"
-	SceneID    uint      `db:"scene_id"`    //"业务下的场景/页面id"
+	SceneID    string    `db:"scene_id"`    //"业务下的场景/页面id"
 	TemplateID uint      `db:"template_id"` //"模板id"
 	StartTime  time.Time `db:"start_time"`  //"任务开始时间"
 	EndTime    time.Time `db:"end_time"`    //"任务结束时间"

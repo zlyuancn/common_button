@@ -25,7 +25,7 @@ func LoadAllModule(ctx context.Context) ([]*ButtonModuleModel, error) {
 
 type ButtonSceneModel struct {
 	ModuleID  uint   `db:"module_id"`  // 用于区分模块
-	SceneID   uint   `db:"scene_id"`   // 子场景id
+	SceneID   string `db:"scene_id"`   // 子场景id
 	SceneName string `db:"scene_name"` // 场景名
 }
 
@@ -41,7 +41,7 @@ func LoadAllScene(ctx context.Context) ([]*ButtonSceneModel, error) {
 type ButtonModel struct {
 	ID           uint      `db:"id"`             // 按钮id
 	ModuleID     uint      `db:"module_id"`      // 用于区分业务模块
-	SceneID      uint      `db:"scene_id"`       // 业务下的场景/页面id
+	SceneID      string    `db:"scene_id"`       // 业务下的场景/页面id
 	CommonTaskID uint      `db:"common_task_id"` // 通用任务id
 	Enabled      byte      `db:"enabled"`        // 状态：0=未发布, 1=已发布
 	SortValue    int       `db:"sort_value"`     // 顺序值. 正(数字小的在前), 排序值相同时以创建时间正序(新创建的在后)

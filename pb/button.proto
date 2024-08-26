@@ -31,7 +31,7 @@ service CommonButtonService{
 
 message GetButtonListReq {
   ButtonModuleID module_id = 1; // 区分业务id
-  repeated ButtonSceneID scene_id = 2; // 区分场景id, 空列表表示拉取全部场景
+  repeated string scene_id = 2; // 区分场景id, 空列表表示拉取全部场景
 }
 
 message GetButtonListRsp {
@@ -47,7 +47,7 @@ message ClickButtonRsp {
 
 message OneClickFinishReq {
   ButtonModuleID module_id = 1; // 区分业务id
-  ButtonSceneID scene_id = 2; // 区分场景id, 空列表表示拉取全部场景
+  string scene_id = 2; // 区分场景id, 空列表表示拉取全部场景
 }
 message OneClickFinishRsp {
   repeated ClickTaskState task_state = 1; // 任务状态
@@ -56,7 +56,7 @@ message OneClickFinishRsp {
 // 按钮
 message Button {
   ButtonModuleID module_id = 1; // 模块id
-  ButtonSceneID scene_id = 2; // 场景id
+  string scene_id = 2; // 场景id
 
   int32 button_id = 3; // 按钮id
   string button_title = 4; // 按钮标题
@@ -107,9 +107,6 @@ message Prize {
 
 enum ButtonModuleID {
   BUTTON_MODULE_ID_UNKNOWN = 0;
-}
-enum ButtonSceneID {
-  BUTTON_SCENE_ID_UNKNOWN = 0;
 }
 
 // 任务周期类型

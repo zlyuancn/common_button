@@ -2,7 +2,7 @@ create table common_button
 (
     `id`             int unsigned auto_increment                not null primary key comment '按钮id',
     `module_id`      int unsigned     default 0                 not null comment '用于区分业务模块',
-    `scene_id`       int unsigned     default 0                 not null comment '业务下的场景/页面id',
+    `scene_id`       varchar(32)      default ''                not null comment '业务下的场景/页面id',
     `common_task_id` int unsigned     default 0                 not null comment '通用任务id',
     `enabled`        tinyint unsigned default 0                 not null comment '状态：0=未发布, 1=已发布',
     `sort_value`     int              default 999               not null comment '排序值. 正序, 排序值相同时以创建时间正序',
@@ -35,7 +35,7 @@ create unique index button_module_unique_index on common_button_module (`module_
 create table common_button_scene
 (
     `module_id`  int unsigned default 0  not null comment '用于区分模块',-- 这里是因为程序中要定义常量, 这里如果使用自增id可能导致测试环境和生产环境不一致
-    `scene_id`   int unsigned default 0  not null comment '子场景id',-- 这里是因为程序中要定义常量, 这里如果使用自增id可能导致测试环境和生产环境不一致
+    `scene_id`   varchar(32)  default '' not null comment '子场景id',-- 这里是因为程序中要定义常量
     -- 以下字段无业务逻辑, 或者是透传到客户端字段
     `scene_name` varchar(64)  default '' not null comment '子场景名',
     `remark`     varchar(256) default '' not null comment '备注'
@@ -47,7 +47,7 @@ create table common_task
 (
     `id`          int unsigned auto_increment             not null primary key comment '任务id',
     `module_id`   int unsigned  default 0                 not null comment '用于区分业务模块, 在业务逻辑中不会检查这个字段与button匹配',
-    `scene_id`    int unsigned  default 0                 not null comment '业务下的场景/页面id, 在业务逻辑中不会检查这个字段与button匹配',
+    `scene_id`    varchar(32)   default ''                not null comment '业务下的场景/页面id, 在业务逻辑中不会检查这个字段与button匹配',
     `template_id` int unsigned  default 0                 not null comment '模板id',
     `start_time`  datetime                                not null comment '任务开始时间',
     `end_time`    datetime                                not null comment '任务结束时间',

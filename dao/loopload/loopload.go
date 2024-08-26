@@ -24,9 +24,9 @@ import (
 var ButtonTaskMap *loopload.LoopLoad[*buttonTaskMap]
 
 type buttonTaskMap struct {
-	ModuleSceneButtonMapping map[pb.ButtonModuleID]map[pb.ButtonSceneID][]*pb.Button // 业务模块的场景/页面映射按钮
-	ButtonIDMapping          map[int32]*pb.Button                                    // 按钮id映射
-	PrizeMapping             map[string]*pb.Prize                                    // 奖品映射
+	ModuleSceneButtonMapping map[pb.ButtonModuleID]map[string][]*pb.Button // 业务模块的场景/页面映射按钮
+	ButtonIDMapping          map[int32]*pb.Button                          // 按钮id映射
+	PrizeMapping             map[string]*pb.Prize                          // 奖品映射
 }
 
 func StartLoopLoad() {
@@ -199,7 +199,7 @@ func loadPrizePB(ctx context.Context, prizeIDs []string) (map[string]*pb.Prize, 
 func genButtonPB(ctx context.Context, b *common_button.ButtonModel, taskMM map[int32]*pb.Task) (*pb.Button, error) {
 	ret := &pb.Button{
 		ModuleId:     pb.ButtonModuleID(b.ModuleID),
-		SceneId:      pb.ButtonSceneID(b.SceneID),
+		SceneId:      b.SceneID,
 		ButtonId:     int32(b.ID),
 		ButtonTitle:  b.ButtonTitle,
 		ButtonDesc:   b.ButtonDesc,
@@ -225,7 +225,7 @@ func genButtonPB(ctx context.Context, b *common_button.ButtonModel, taskMM map[i
 	return ret, nil
 }
 func loadButtonPB(ctx context.Context, taskMM map[int32]*pb.Task) (
-	map[pb.ButtonModuleID]map[pb.ButtonSceneID][]*pb.Button, map[int32]*pb.Button, error,
+	map[pb.ButtonModuleID]map[string][]*pb.Button, map[int32]*pb.Button, error,
 ) {
 	// 加载module
 	moduleList, err := common_button.LoadAllModule(ctx)
@@ -252,10 +252,10 @@ func loadButtonPB(ctx context.Context, taskMM map[int32]*pb.Task) (
 		return buttonList[i].Ctime.Unix() < buttonList[j].Ctime.Unix()
 	})
 
-	msButtonMM := make(map[pb.ButtonModuleID]map[pb.ButtonSceneID][]*pb.Button, len(moduleList))
+	msButtonMM := make(map[pb.ButtonModuleID]map[string][]*pb.Button, len(moduleList))
 	buttonMM := make(map[int32]*pb.Button, len(buttonList))
 	for _, module := range moduleList {
-		msButtonMM[pb.ButtonModuleID(module.ModuleID)] = make(map[pb.ButtonSceneID][]*pb.Button)
+		msButtonMM[pb.ButtonModuleID(module.ModuleID)] = make(map[string][]*pb.Button)
 	}
 	for _, scene := range sceneList {
 		scenes, ok := msButtonMM[pb.ButtonModuleID(scene.ModuleID)]
@@ -263,7 +263,7 @@ func loadButtonPB(ctx context.Context, taskMM map[int32]*pb.Task) (
 			logger.Error(ctx, "common_button 发现scene使用了未定义的module", zap.Any("scene", scene))
 			return nil, nil, fmt.Errorf("scene使用了未定义的module. sceneID=%d, moduleID=%d", scene.SceneID, scene.ModuleID)
 		}
-		scenes[pb.ButtonSceneID(scene.SceneID)] = make([]*pb.Button, 0)
+		scenes[scene.SceneID] = make([]*pb.Button, 0)
 	}
 	for _, b := range buttonList {
 		scenes, ok := msButtonMM[pb.ButtonModuleID(b.ModuleID)]
@@ -271,7 +271,7 @@ func loadButtonPB(ctx context.Context, taskMM map[int32]*pb.Task) (
 			logger.Error(ctx, "common_button 发现button使用了未定义的module", zap.Any("button", b))
 			return nil, nil, fmt.Errorf("button使用了未定义的module. buttonID=%d, moduleID=%d", b.ID, b.ModuleID)
 		}
-		buttons, ok := scenes[pb.ButtonSceneID(b.SceneID)]
+		buttons, ok := scenes[b.SceneID]
 		if !ok {
 			logger.Error(ctx, "common_button 发现button使用了未定义的scene", zap.Any("button", b))
 			return nil, nil, fmt.Errorf("button使用了未定义的module. buttonID=%d, moduleID=%d, sceneID=%d", b.ID, b.ModuleID, b.SceneID)
@@ -283,14 +283,14 @@ func loadButtonPB(ctx context.Context, taskMM map[int32]*pb.Task) (
 			return nil, nil, fmt.Errorf("button无法转为pb. buttonID=%d, err=%v", b.ID, err)
 		}
 
-		scenes[pb.ButtonSceneID(b.SceneID)] = append(buttons, bPB)
+		scenes[b.SceneID] = append(buttons, bPB)
 		buttonMM[int32(b.ID)] = bPB
 	}
 	return msButtonMM, buttonMM, nil
 }
 
 // 根据业务模块id和场景/页面id批量获取按钮, 场景/页面id为空则获取业务模块id下的所有按钮
-func GetButtonsByModuleAndScene(ctx context.Context, moduleID pb.ButtonModuleID, sceneIDs []pb.ButtonSceneID) ([]*pb.Button, error) {
+func GetButtonsByModuleAndScene(ctx context.Context, moduleID pb.ButtonModuleID, sceneIDs []string) ([]*pb.Button, error) {
 	btm := ButtonTaskMap.Get(ctx)
 	scenes, ok := btm.ModuleSceneButtonMapping[moduleID]
 	if !ok {
