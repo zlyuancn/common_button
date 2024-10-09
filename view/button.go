@@ -77,11 +77,7 @@ func (impl implCli) GetButtonList(ctx context.Context, req *pb.GetButtonListReq)
 		}
 
 		// 隐藏
-		hide, err := t.IsHide(ctx)
-		if err != nil {
-			logger.Error(ctx, "GetButtonList abnormal. check task IsHide err.", zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn), zap.Error(err))
-			return nil, fmt.Errorf("GetButtonList abnormal. check task IsHide err. btnID=%d, taskID=%d, err=%v", btn.ButtonId, btn.Task.TaskId, err)
-		}
+		hide := t.IsHide(ctx)
 		if hide {
 			continue
 		}
@@ -155,11 +151,7 @@ func (implCli) ClickButton(ctx context.Context, req *pb.ClickButtonReq) (*pb.Cli
 		FinishStatus: t.GetUserTaskData().FinishStatus,
 		Prizes:       btn.Task.Prizes,
 	}
-	hide, err := t.IsHide(ctx)
-	if err != nil {
-		logger.Error(ctx, "ClickButton abnormal. check task IsHide err.", zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn), zap.Error(err))
-		return nil, fmt.Errorf("ClickButton abnormal. check task IsHide err. btnID=%d, taskID=%d, err=%v", btn.ButtonId, btn.Task.TaskId, err)
-	}
+	hide := t.IsHide(ctx)
 	if hide {
 		ret.FinishStatus = pb.TaskFinishStatus_TASK_FINISH_STATUS_Hide
 	}
@@ -219,11 +211,7 @@ func (impl implCli) OneClickFinish(ctx context.Context, req *pb.OneClickFinishRe
 			FinishStatus: t.GetUserTaskData().FinishStatus,
 			Prizes:       btn.Task.Prizes,
 		}
-		hide, err := t.IsHide(ctx)
-		if err != nil {
-			logger.Error(ctx, "OneClickFinish abnormal. check task IsHide err.", zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn), zap.Error(err))
-			return nil, fmt.Errorf("OneClickFinish abnormal. check task IsHide err. btnID=%d, taskID=%d, err=%v", btn.ButtonId, btn.Task.TaskId, err)
-		}
+		hide := t.IsHide(ctx)
 		if hide {
 			state.FinishStatus = pb.TaskFinishStatus_TASK_FINISH_STATUS_Hide
 		}

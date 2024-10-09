@@ -21,7 +21,7 @@ type Task interface {
 	// 判断是否需要持久化, 会立即清除需要持久化标记
 	IsNeedPersistence(ctx context.Context) bool
 	// 判断是否隐藏
-	IsHide(ctx context.Context) (bool, error)
+	IsHide(ctx context.Context) bool
 	// 判断是否需要查询任务进度
 	IsNeedQueryTaskProgress(ctx context.Context) bool
 
@@ -55,12 +55,17 @@ func (b *BaseTask) IsNeedPersistence(ctx context.Context) bool {
 	return ret
 }
 
-func (b *BaseTask) IsHide(ctx context.Context) (bool, error) {
+func (b *BaseTask) IsHide(ctx context.Context) bool {
 	if !b.taskIsValid() {
-		return true, nil
+		return true
 	}
 
-	return hide_rule.CheckIsHide(ctx, b.btn, b.td)
+	hide, err := hide_rule.CheckIsHide(ctx, b.btn, b.td)
+	if err != nil {
+		logger.Error(ctx, "IsHide check task IsHide err.", zap.Int32("taskID", b.btn.Task.TaskId), zap.Any("btnId", b.btn.ButtonId), zap.Error(err))
+		return false // hide规则失效则不隐藏
+	}
+	return hide
 }
 
 func (b *BaseTask) IsNeedQueryTaskProgress(ctx context.Context) bool {

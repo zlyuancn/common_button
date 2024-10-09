@@ -151,12 +151,7 @@ func (r repoImpl) MultiFinishTasks(ctx context.Context, uid string, buttons []*p
 		if len(t.GetButton().Task.Prizes) == 0 {
 			continue
 		}
-		hide, err := t.IsHide(ctx)
-		if err != nil {
-			btn := t.GetButton()
-			logger.Error(ctx, "OneClickFinish abnormal. check task IsHide err.", zap.String("uid", uid), zap.Int32("taskID", btn.Task.TaskId), zap.Any("btn", btn), zap.Error(err))
-			return nil, fmt.Errorf("OneClickFinish abnormal. check task IsHide err. btnID=%d, taskID=%d, err=%v", btn.ButtonId, btn.Task.TaskId, err)
-		}
+		hide := t.IsHide(ctx)
 		if hide {
 			continue
 		}
